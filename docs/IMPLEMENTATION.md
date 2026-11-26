@@ -438,3 +438,11 @@ Wireframe cấu trúc (đợt 1, đã duyệt): https://claude.ai/artifact/8JxyD
 - `Vision.svg` còn dùng màu ngoài palette, cần quyết định.
 - Đã implement Hero + Break Section ở 1920px (lệch tối đa 1–2px so với Figma). Mobile 768/390 chờ lệnh mới.
 - Lưới nền Hero: 2 lớp PNG tile theo chiều dọc (cao 1097.5px, lớp 2 bắt đầu y=1098), blend screen 50% trên nền đen 10%.
+
+## Changelog v0.4
+
+- Đã implement 6 section còn lại ở 1920px: Projects, USP, Hashtag, Community, Last CTA, Footer (`src/components/sections/*`, copy trong `src/content/sections.ts`). Tổng canvas 8357px khớp Figma.
+- Font body dùng thêm SVN-Gilroy Regular (400) và Bold (700) ngoài Medium (500).
+- `PillLink` có `variant`: `light` (nền trắng, header và Last CTA) và `dark` (nền ink, các section nền trắng).
+- Figma các section này vẫn dùng màu cũ (#0800B2, #FFEF00, #BA1616, đen #000); code đã map về token mới (blue, yellow, red, ink).
+- Hashtag: 2 pill ngoài canvas (trái) chưa dựng, dành cho marquee sau.
