@@ -15,13 +15,13 @@ export function Hero() {
     >
       {/*
         Lưới nền: Figma đặt 2 lớp ảnh (node 2721:1004 và 2727:1151), cover. PNG gốc rất tối (tối đa 16/255),
-        nên đo lại theo ảnh Figma: lớp đen 10% làm nền (13/255) + đường lưới hiện lên bằng screen 50% (~22/255).
+        nên đo lại theo ảnh Figma: lớp đen 10% làm nền + đường lưới hiện lên bằng screen 100% (đo theo ảnh Figma 26.11: nền 14, đường ~20/255).
       */}
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-black/10">
         {[0, 1098].map((top) => (
           <div
             key={top}
-            className="absolute left-0 h-[1097.5px] w-[1920px] bg-[url('/assets/backgrounds/grid-background.png')] bg-[length:1920px_900px] bg-repeat-y opacity-50 mix-blend-screen"
+            className="absolute left-0 h-[1097.5px] w-[1920px] bg-[url('/assets/backgrounds/grid-background.png')] bg-[length:1920px_900px] bg-repeat-y opacity-100 mix-blend-screen"
             style={{ top }}
           />
         ))}
@@ -63,7 +63,7 @@ export function Hero() {
         <p className="text-trim text-[14px] leading-none font-medium text-white uppercase">
           {hero.scrollHint}
         </p>
-        <Image src="/assets/ui/arrow-down.svg" alt="" width={48} height={48} />
+        <Image src="/assets/ui/arrow-down.png" alt="" width={48} height={48} />
       </div>
 
       {/* Marquee icon */}

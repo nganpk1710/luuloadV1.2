@@ -7,12 +7,14 @@ type PillLinkProps = Omit<ComponentProps<typeof Link>, "className"> & {
    * light: trắng → hover vàng, chữ ink (Header, Last CTA).
    * dark: ink → hover trắng viền ink, chữ ink (các section nền trắng).
    */
-  variant?: "light" | "dark";
+  variant?: "light" | "dark" | "ink";
 };
 
 const variants = {
   light: { box: "h-10 px-6 py-3", front: "bg-white text-ink", back: "bg-yellow text-ink" },
   dark: { box: "border-2 border-ink p-[22px]", front: "bg-ink text-white", back: "bg-white text-ink" },
+  /** Header khi cuộn (nền trắng): ink chữ vàng, cao 40px → hover trắng viền ink. */
+  ink: { box: "h-10 border-2 border-ink px-6", front: "bg-ink text-yellow", back: "bg-white text-ink" },
 } as const;
 
 /**

@@ -13,9 +13,9 @@ const HERO_H = 1680;
 
 /**
  * Hero → Break (MOTION mục 3). Hero dính (sticky) khi đáy Hero chạm đáy viewport, rồi scrub:
- * 0–0.15 icon tách ra hai bên, vòm về tâm · 0.15–0.45 morph vòm → khối vuông, fill vàng từ dưới lên ·
- * 0.45–1 khối vàng phóng to phủ viewport, nối liền nền vàng của Break Section.
- * Đặt component này bên trong section Hero; Hero đánh dấu phần tử bằng data-arch, data-arch-fill, data-hero-side, data-hero-fade.
+ * 0–0.35 vòm morph tại chỗ thành khối vuông, fill vàng từ dưới lên · 0.35–1 khối vàng phóng to tại chỗ
+ * (tâm phóng là tâm vòm) cho tới khi phủ viewport, nối liền nền vàng của Break Section. Icon khác giữ nguyên.
+ * Đặt component này bên trong section Hero; Hero đánh dấu phần tử bằng data-arch, data-arch-fill.
  */
 export function HeroToBreak() {
   const marker = useRef<HTMLSpanElement>(null);
@@ -31,8 +31,6 @@ export function HeroToBreak() {
       const zoom = pageZoom;
       const vw = () => window.innerWidth / zoom();
       const vh = () => Math.min(window.innerHeight / zoom(), HERO_H);
-      const dy = () => vh() / 2 - (ARCH.top + ARCH.h / 2 - (HERO_H - vh()));
-      const cover = () => Math.max(vw() / ARCH.w, vh() / ARCH.h) * 1.15;
 
       // Không dùng pin của GSAP (lệch khi trang bị CSS zoom): Hero nằm trong khung cao 1680 + 1.5 viewport
       // và tự dính bằng CSS sticky (xem app/page.tsx). ScrollTrigger chỉ đọc tiến độ cuộn.
@@ -47,18 +45,22 @@ export function HeroToBreak() {
           invalidateOnRefresh: true,
         },
       });
-      tl.to(hero.querySelectorAll('[data-hero-side="left"]'), { x: -80, autoAlpha: 0, duration: 0.15 }, 0)
-        .to(hero.querySelectorAll('[data-hero-side="right"]'), { x: 80, autoAlpha: 0, duration: 0.15 }, 0)
-        .to(hero.querySelectorAll("[data-hero-fade]"), { autoAlpha: 0, duration: 0.12 }, 0)
-        .to(arch, { y: dy, duration: 0.15 }, 0)
-        .fromTo(
-          arch,
-          { borderRadius: "140.5px 140.5px 0px 0px" },
-          { borderRadius: "20px 20px 20px 20px", duration: 0.3, ease: "power1.inOut" },
-          0.15,
-        )
-        .fromTo(fill, { clipPath: "inset(100% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.3 }, 0.15)
-        .to(arch, { scale: cover, duration: 0.55, ease: "power2.in" }, 0.45);
+      // Giữ nguyên vị trí (như acronym.lol): các icon khác đứng yên, vòm morph và phóng to tại chỗ.
+      const cover = () => {
+        const oy = ARCH.top + ARCH.h / 2 - Math.max(0, HERO_H - vh()); // tâm vòm theo toạ độ viewport
+        const ox = (vw() - 1920) / 2 + ARCH.left + ARCH.w / 2;
+        const sy = (2 * Math.max(oy, vh() - oy)) / ARCH.h;
+        const sx = (2 * Math.max(ox, vw() - ox)) / ARCH.w;
+        return Math.max(sx, sy) * 1.08;
+      };
+      tl.fromTo(
+        arch,
+        { borderRadius: "140.5px 140.5px 0px 0px" },
+        { borderRadius: "20px 20px 20px 20px", duration: 0.35, ease: "power1.inOut" },
+        0,
+      )
+        .fromTo(fill, { clipPath: "inset(100% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.35 }, 0)
+        .to(arch, { scale: cover, duration: 0.65, ease: "power2.in" }, 0.35);
     }, hero);
     return () => ctx.revert();
   }, []);

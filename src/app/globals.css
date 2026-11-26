@@ -267,14 +267,16 @@ body {
   }
 }
 
-/* Hashtag pill hover (mục 7): lật theo trục X sang mặt trắng + nghiêng nhẹ */
+/* Hashtag pill hover (mục 7): roll 2D như nút Slush (mặt trước ép dẹt đẩy lên, mặt sau trồi lên), nghiêng nhẹ */
 .hashtag-pill {
-  perspective: 900px;
-  transition: rotate 520ms var(--ease-spring);
+  overflow: hidden;
+  border-radius: 20px;
+  transition: rotate 520ms var(--ease-spring), scale 420ms var(--ease-spring);
 }
 .hashtag-pill:hover {
   z-index: 2;
   rotate: var(--tilt);
+  scale: 1.02;
 }
 .hashtag-face {
   position: absolute;
@@ -283,17 +285,16 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 20px;
-  backface-visibility: hidden;
-  transition: transform 560ms var(--ease-spring);
+  transition: transform 460ms var(--ease-spring);
 }
 .hashtag-back {
-  transform: rotateX(-180deg);
+  transform: translateY(100%) scaleY(0.6);
 }
 .hashtag-pill:hover .hashtag-front {
-  transform: rotateX(180deg);
+  transform: translateY(-100%) scaleY(0.6);
 }
 .hashtag-pill:hover .hashtag-back {
-  transform: rotateX(0deg);
+  transform: translateY(0) scaleY(1);
 }
 @media (prefers-reduced-motion: reduce) {
   .hashtag-pill,

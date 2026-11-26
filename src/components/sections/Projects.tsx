@@ -11,13 +11,14 @@ import { ease, prefersReducedMotion } from "@/lib/motion";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const THETA = 38; // độ giữa 2 ảnh trên trụ
+const THETA = 36; // độ giữa 2 ảnh trên trụ
+const STEP = 0.6; // số viewport cuộn cho mỗi ảnh (nhịp nhanh như reference)
 const RADIUS = 820; // px: 2r·sin(θ/2) ≈ 535 = cao ảnh 475 + khe 60
 const IMG = { w: 760, h: 475 };
 
 /**
- * Projects 1920 × 1144 (Figma 2718:429). Bố cục giữ nguyên; khung giữa là trụ 3D nằm ngang
- * xoay theo scroll (MOTION mục 4). Pin 3 × 100vh (không dùng snap của ScrollTrigger vì xung đột với Lenis); cột phải đổi theo ảnh active.
+ * Projects 1920 × 1144 (Figma 2718:429). Bố cục giữ nguyên; khung giữa là trụ 3D nằm ngang nhìn từ bên trong
+ * (lõm vào trong, như reference) xoay theo scroll (MOTION mục 4). Pin 3 × 100vh (không dùng snap của ScrollTrigger vì xung đột với Lenis); cột phải đổi theo ảnh active.
  */
 export function Projects() {
   const section = useRef<HTMLElement>(null);
@@ -31,16 +32,16 @@ export function Projects() {
     const d = drum.current;
     if (!el || !d || prefersReducedMotion()) return;
     const ctx = gsap.context(() => {
-      gsap.set(d, { z: -RADIUS, rotateX: 0 });
+      gsap.set(d, { z: RADIUS, rotateX: 0 });
       gsap.to(d, {
-        rotateX: last * THETA,
+        rotateX: -last * THETA,
         ease: "none",
         scrollTrigger: {
           // Section dính bằng CSS sticky trong khung cao 1144 + 3 viewport (không dùng pin của GSAP).
           trigger: el.parentElement ?? el,
           start: "top top",
-          end: () => `+=${window.innerHeight * last}`,
-          scrub: 0.6,
+          end: () => `+=${window.innerHeight * last * STEP}`,
+          scrub: 0.4,
           invalidateOnRefresh: true,
           onUpdate: (st) => setActive(Math.round(st.progress * last)),
         },
@@ -52,7 +53,7 @@ export function Projects() {
   const item = items[active];
 
   return (
-    <div style={{ height: `calc(1144px + ${last} * var(--vhp, 1080px))` }}>
+    <div style={{ height: `calc(1144px + ${last * STEP} * var(--vhp, 1080px))` }}>
       <section
         ref={section}
         aria-labelledby="projects-title"
@@ -85,18 +86,18 @@ export function Projects() {
             className="absolute top-1/2 left-0 h-0 w-full"
             style={{
               transformStyle: "preserve-3d",
-              transform: `translateZ(-${RADIUS}px)`,
+              transform: `translateZ(${RADIUS}px)`,
             }}
           >
             {items.map((it, i) => (
               <div
                 key={it.name}
-                className="absolute left-0 overflow-hidden bg-[#EDEDED] [backface-visibility:hidden]"
+                className="absolute left-0 overflow-hidden bg-[#EDEDED]"
                 style={{
                   width: IMG.w,
                   height: IMG.h,
                   top: -IMG.h / 2,
-                  transform: `rotateX(${-i * THETA}deg) translateZ(${RADIUS}px)`,
+                  transform: `rotateX(${i * THETA}deg) translateZ(-${RADIUS}px)`,
                 }}
               >
                 <Image

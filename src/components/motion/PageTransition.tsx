@@ -17,18 +17,38 @@ const CARD = 0.36; // tỉ lệ tấm so với viewport
 const GAP = 28;
 const TILT = 32;
 
+declare global {
+  interface Window {
+    /** Có trong bản preview 1 file: thay router bằng đổi view. */
+    __preview?: { view: string; routes: string[]; go: (href: string) => void };
+  }
+}
+
 export function PageTransition({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const page = useRef<HTMLDivElement>(null);
   const overlay = useRef<HTMLDivElement>(null);
   const busy = useRef(false);
+  const navigate = useEffectEvent((href: string) =>
+    window.__preview ? window.__preview.go(href) : router.push(href, { scroll: false }),
+  );
   const arrived = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     arrived.current?.();
     arrived.current = null;
   }, [pathname]);
+
+  // Bản preview 1 file (artifact) không có router: trang báo "đã tới" bằng sự kiện.
+  useEffect(() => {
+    const f = () => {
+      arrived.current?.();
+      arrived.current = null;
+    };
+    window.addEventListener("preview:arrived", f);
+    return () => window.removeEventListener("preview:arrived", f);
+  }, []);
 
   const run = useEffectEvent(async (href: string) => {
     const el = page.current;
@@ -70,7 +90,7 @@ export function PageTransition({ children }: { children: ReactNode }) {
 
     // Nạp trang mới khi tấm đen đã ở giữa (tấm cũ giữ nội dung cũ trong lúc trượt).
     const arrivedP = new Promise<void>((res) => (arrived.current = res));
-    router.push(href, { scroll: false });
+    navigate(href);
     await Promise.race([arrivedP, new Promise((r) => setTimeout(r, 1500))]);
 
     // Trang mới đã render bên dưới: đưa về trạng thái gốc, ẩn tới khi tấm đen phủ xong.
@@ -98,17 +118,22 @@ export function PageTransition({ children }: { children: ReactNode }) {
       if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       const a = (e.target as HTMLElement).closest("a");
       if (!a || a.target === "_blank" || a.hasAttribute("download")) return;
-      const url = new URL(a.href, location.href);
-      if (url.origin !== location.origin || url.pathname === location.pathname || url.hash) return;
+      // Dùng href gốc thay vì so origin: trong iframe sandbox origin là "null".
+      const raw = a.getAttribute("href") ?? "";
+      if (!raw.startsWith("/") || raw.startsWith("//") || raw.includes("#")) return;
+      const target = raw.replace(/\/$/, "") || "/";
+      const preview = window.__preview;
+      const current = preview ? preview.view : location.pathname.replace(/\/$/, "") || "/";
       // Chạy ở capture phase để chặn trước <Link> của Next (Link tự điều hướng ở bubble phase).
       e.preventDefault();
       e.stopPropagation();
-      if (busy.current) return;
+      if (preview && !preview.routes.includes(target)) return; // trang chưa có trong preview
+      if (target === current || busy.current) return;
       if (prefersReducedMotion()) {
-        router.push(url.pathname + url.search);
+        navigate(raw);
         return;
       }
-      void run(url.pathname + url.search);
+      void run(raw);
     };
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);
