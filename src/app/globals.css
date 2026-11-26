@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+/*
+ * SVN-Gilroy (body). Gilroy là font thương mại (© Radomir Tinkov), cần xác nhận license web.
+ * Dùng @font-face thay vì next/font để build KHÔNG lỗi khi file font chưa có trong repo
+ * (repo public nên file .otf không được commit; thiếu file thì tự dùng font hệ thống).
+ */
+@font-face {
+  font-family: "SVN-Gilroy";
+  src:
+    local("SVN-Gilroy Medium"),
+    url("/assets/fonts/gilroy/SVN-Gilroy-Medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Design tokens: Lưu Load V2. Nguồn: docs/IMPLEMENTATION.md mục 2 */
+@theme {
+  /* Color */
+  --color-ink: #0f1010;
+  --color-yellow: #f9ee16;
+  --color-red: #ba2025;
+  --color-blue: #1964b0;
+  --color-sky: #4fc8ec;
+  --color-amber: #feba17;
+  --color-white: #ffffff;
+
+  /* Breakpoint (mobile-first, base = 390) */
+  --breakpoint-md: 768px;
+  --breakpoint-xl: 1440px;
+  --breakpoint-2xl: 1920px;
+}
+
+/* Font: --font-smooch do next/font (src/lib/fonts.ts) gán lúc chạy nên cần `inline`. */
+@theme inline {
+  --font-display: var(--font-smooch), ui-sans-serif, system-ui, sans-serif;
+  --font-body: "SVN-Gilroy", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Cắt khoảng trống trên/dưới chữ theo cap-height và baseline, giống Figma (text-box-trim). */
+@utility text-trim {
+  text-box: trim-both cap alphabetic;
+}
+
+html {
+  background: var(--color-ink);
+  color: var(--color-white);
+}
+
+body {
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

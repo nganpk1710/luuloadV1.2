@@ -1,0 +1,5 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+<!-- Xấp xỉ. Figma node 2727:1030 là ảnh raster; thay bằng SVG export khi có. -->
+<path d="M24 2V40" stroke="white" stroke-width="3.5"/>
+<path d="M8 22L24 44L40 22" stroke="white" stroke-width="3.5" stroke-linejoin="miter"/>
+</svg>
