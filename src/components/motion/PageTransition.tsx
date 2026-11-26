@@ -4,7 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useEffectEvent, useRef, type ReactNode } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { prefersReducedMotion } from "@/lib/motion";
+import { pageZoom, prefersReducedMotion } from "@/lib/motion";
 
 /**
  * Page transition kiểu slush.app (MOTION mục 11, chốt 26.11):
@@ -35,7 +35,7 @@ export function PageTransition({ children }: { children: ReactNode }) {
     const ov = overlay.current;
     if (!el || !ov) return;
     busy.current = true;
-    const zoom = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
+    const zoom = pageZoom();
     const vw = window.innerWidth / zoom;
     const vh = window.innerHeight / zoom;
     const w = vw * CARD;

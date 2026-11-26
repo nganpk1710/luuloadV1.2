@@ -20,3 +20,9 @@ export function prefersReducedMotion() {
 export function canHover() {
   return typeof window !== "undefined" && window.matchMedia("(hover: hover)").matches;
 }
+
+/** Hệ số CSS zoom của <html> (preview ở màn < 1920 dùng zoom để thu cả canvas 1920). */
+export function pageZoom() {
+  if (typeof window === "undefined") return 1;
+  return parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
+}

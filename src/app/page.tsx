@@ -14,7 +14,12 @@ export default function Home() {
     <div>
       <main className="relative mx-auto w-[1920px]">
         <Header />
-        <Hero />
+        {/* Khung cho Hero → Break: Hero dính đáy viewport trong 1.5 viewport cuộn (MOTION mục 3) */}
+        <div style={{ height: "calc(1680px + 1.5 * var(--vhp, 1080px))" }}>
+          <div className="sticky" style={{ top: "min(0px, calc(var(--vhp, 1080px) - 1680px))" }}>
+            <Hero />
+          </div>
+        </div>
         <BreakSection />
         <Projects />
         <Usp />

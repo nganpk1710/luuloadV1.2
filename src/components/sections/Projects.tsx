@@ -36,11 +36,12 @@ export function Projects() {
         rotateX: last * THETA,
         ease: "none",
         scrollTrigger: {
-          trigger: el,
+          // Section dính bằng CSS sticky trong khung cao 1144 + 3 viewport (không dùng pin của GSAP).
+          trigger: el.parentElement ?? el,
           start: "top top",
-          end: `+=${last * 100}%`,
-          pin: true,
+          end: () => `+=${window.innerHeight * last}`,
           scrub: 0.6,
+          invalidateOnRefresh: true,
           onUpdate: (st) => setActive(Math.round(st.progress * last)),
         },
       });
@@ -51,76 +52,106 @@ export function Projects() {
   const item = items[active];
 
   return (
-    <section
-      ref={section}
-      aria-labelledby="projects-title"
-      className="relative h-[1144px] w-[1920px] overflow-hidden bg-white text-ink"
-    >
-      <h2
-        id="projects-title"
-        className="text-trim absolute top-[200px] left-8 w-[472px] font-display text-[120px] leading-[107.273px] font-extrabold uppercase"
+    <div style={{ height: `calc(1144px + ${last} * var(--vhp, 1080px))` }}>
+      <section
+        ref={section}
+        aria-labelledby="projects-title"
+        className="sticky top-0 h-[1144px] w-[1920px] overflow-hidden bg-white text-ink"
       >
-        {projects.title}
-      </h2>
-      <p className="text-trim absolute top-[464px] left-8 w-[440px] text-[24px] leading-[39px] font-medium uppercase">
-        {projects.subtitle}
-      </p>
-      <PillLink variant="dark" href={projects.cta.href} className="absolute top-[761px] left-8 w-[164px]">
-        {projects.cta.label}
-      </PillLink>
-
-      {/* Trụ 3D */}
-      <div
-        className="absolute top-[215.67px] left-[580px] h-[793.67px] w-[760px] overflow-hidden"
-        style={{ perspective: 1400 }}
-      >
-        <div
-          ref={drum}
-          className="absolute top-1/2 left-0 h-0 w-full"
-          style={{ transformStyle: "preserve-3d", transform: `translateZ(-${RADIUS}px)` }}
+        <h2
+          id="projects-title"
+          className="text-trim absolute top-[200px] left-8 w-[472px] font-display text-[120px] leading-[107.273px] font-extrabold uppercase"
         >
-          {items.map((it, i) => (
-            <div
-              key={it.name}
-              className="absolute left-0 overflow-hidden bg-[#EDEDED] [backface-visibility:hidden]"
-              style={{
-                width: IMG.w,
-                height: IMG.h,
-                top: -IMG.h / 2,
-                transform: `rotateX(${-i * THETA}deg) translateZ(${RADIUS}px)`,
+          {projects.title}
+        </h2>
+        <p className="text-trim absolute top-[464px] left-8 w-[440px] text-[24px] leading-[39px] font-medium uppercase">
+          {projects.subtitle}
+        </p>
+        <PillLink
+          variant="dark"
+          href={projects.cta.href}
+          className="absolute top-[761px] left-8 w-[164px]"
+        >
+          {projects.cta.label}
+        </PillLink>
+
+        {/* Trụ 3D */}
+        <div
+          className="absolute top-[215.67px] left-[580px] h-[793.67px] w-[760px] overflow-hidden"
+          style={{ perspective: 1400 }}
+        >
+          <div
+            ref={drum}
+            className="absolute top-1/2 left-0 h-0 w-full"
+            style={{
+              transformStyle: "preserve-3d",
+              transform: `translateZ(-${RADIUS}px)`,
+            }}
+          >
+            {items.map((it, i) => (
+              <div
+                key={it.name}
+                className="absolute left-0 overflow-hidden bg-[#EDEDED] [backface-visibility:hidden]"
+                style={{
+                  width: IMG.w,
+                  height: IMG.h,
+                  top: -IMG.h / 2,
+                  transform: `rotateX(${-i * THETA}deg) translateZ(${RADIUS}px)`,
+                }}
+              >
+                <Image
+                  src={it.image}
+                  alt={it.alt}
+                  fill
+                  sizes="760px"
+                  className="object-cover"
+                  priority={i < 2}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Cột phải: đổi theo ảnh active */}
+        <div
+          className="absolute top-[200px] left-[1448px] w-[440px]"
+          aria-live="polite"
+        >
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={item.name}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{
+                opacity: 1,
+                y: 0,
+                transition: { duration: 0.3, ease: ease.out },
+              }}
+              exit={{
+                opacity: 0,
+                y: -12,
+                transition: { duration: 0.18, ease: ease.out },
               }}
             >
-              <Image src={it.image} alt={it.alt} fill sizes="760px" className="object-cover" priority={i < 2} />
-            </div>
-          ))}
+              <p className="text-trim absolute top-0 left-0 font-display text-[20px] leading-[107.273px] font-bold uppercase">
+                {item.index}
+              </p>
+              <p className="text-trim absolute top-[39px] left-0 font-display text-[60px] leading-[107.273px] font-extrabold whitespace-nowrap uppercase">
+                {item.name}
+              </p>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{
+                  opacity: 1,
+                  transition: { delay: 0.06, duration: 0.3 },
+                }}
+                className="text-trim absolute top-[146px] left-0 w-[440px] text-[20px] leading-[30px] font-normal"
+              >
+                {item.body}
+              </motion.p>
+            </motion.div>
+          </AnimatePresence>
         </div>
-      </div>
-
-      {/* Cột phải: đổi theo ảnh active */}
-      <div className="absolute top-[200px] left-[1448px] w-[440px]" aria-live="polite">
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={item.name}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0, transition: { duration: 0.3, ease: ease.out } }}
-            exit={{ opacity: 0, y: -12, transition: { duration: 0.18, ease: ease.out } }}
-          >
-            <p className="text-trim absolute top-0 left-0 font-display text-[20px] leading-[107.273px] font-bold uppercase">
-              {item.index}
-            </p>
-            <p className="text-trim absolute top-[39px] left-0 font-display text-[60px] leading-[107.273px] font-extrabold whitespace-nowrap uppercase">
-              {item.name}
-            </p>
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1, transition: { delay: 0.06, duration: 0.3 } }}
-              className="text-trim absolute top-[146px] left-0 w-[440px] text-[20px] leading-[30px] font-normal"
-            >
-              {item.body}
-            </motion.p>
-          </motion.div>
-        </AnimatePresence>
-      </div>
-    </section>
+      </section>
+    </div>
   );
 }

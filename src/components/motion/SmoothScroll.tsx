@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import Lenis from "lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { prefersReducedMotion } from "@/lib/motion";
+import { pageZoom, prefersReducedMotion } from "@/lib/motion";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -16,6 +16,15 @@ declare global {
 
 /** Lenis là nguồn duy nhất điều khiển scroll, đồng bộ với ScrollTrigger (IMPLEMENTATION mục 4.3). */
 export function SmoothScroll() {
+  // --vhp: chiều cao viewport theo px của canvas 1920 (đã chia CSS zoom), dùng cho các khối sticky.
+  useEffect(() => {
+    const set = () =>
+      document.documentElement.style.setProperty("--vhp", `${window.innerHeight / pageZoom()}px`);
+    set();
+    window.addEventListener("resize", set);
+    return () => window.removeEventListener("resize", set);
+  }, []);
+
   useEffect(() => {
     if (prefersReducedMotion()) return;
     const lenis = new Lenis({ lerp: 0.1 });
