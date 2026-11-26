@@ -1,5 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
+import { FooterWordmark } from "@/components/motion/FooterWordmark";
+import { RollText } from "@/components/motion/RollText";
 import { footer } from "@/content/sections";
 
 const small = "absolute text-[14px] leading-[16.5px] font-normal whitespace-nowrap uppercase";
@@ -8,13 +9,7 @@ const small = "absolute text-[14px] leading-[16.5px] font-normal whitespace-nowr
 export function Footer() {
   return (
     <footer className="relative h-[900px] w-[1920px] overflow-hidden bg-ink text-white">
-      <Image
-        src="/assets/footer/wordmark.svg"
-        alt="Lưu Load"
-        width={1856}
-        height={300}
-        className="absolute top-0 left-8 max-w-none"
-      />
+      <FooterWordmark className="absolute top-0 left-8" />
       <p className="text-trim absolute top-[403px] left-[27px] w-[557px] text-[24px] leading-[40px] font-medium uppercase">
         {footer.body}
       </p>
@@ -27,7 +22,9 @@ export function Footer() {
             style={{ left: col.left, gap: col.gap }}
           >
             {col.links.map((l) => (
-              <Link key={l.label} href={l.href} className="text-trim">{l.label}</Link>
+              <Link key={l.label} href={l.href} className="text-trim group">
+                <RollText text={l.label} />
+              </Link>
             ))}
           </nav>
         </div>
@@ -35,7 +32,7 @@ export function Footer() {
 
       <p className={`${small} top-[836px] left-8`}>{footer.copyright}</p>
       {footer.legal.map((l) => (
-        <Link key={l.label} href={l.href} className={`${small} top-[836px]`} style={{ left: l.left }}>
+        <Link key={l.label} href={l.href} className={`${small} underline-link top-[836px]`} style={{ left: l.left }}>
           {l.label}
         </Link>
       ))}

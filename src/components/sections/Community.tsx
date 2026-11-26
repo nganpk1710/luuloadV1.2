@@ -32,18 +32,51 @@ export function Community() {
         {community.cta.label}
       </PillLink>
 
-      {community.cards.map((c) => (
-        <article
-          key={c.index}
-          className={`absolute h-[525px] w-[442px] rounded-[20px] border-[20px] border-solid bg-ink font-display font-bold text-white ${c.border}`}
-          style={{ left: c.left, top: c.top }}
-        >
-          <p className="text-trim absolute top-[62px] left-[35px] text-[24px] leading-[40px] whitespace-nowrap">{c.index}</p>
-          <h3 className={`text-trim absolute left-[35px] w-[265px] uppercase ${c.size}`} style={{ top: c.titleTop }}>
-            {c.title}
-          </h3>
-        </article>
-      ))}
+      {community.cards.map((c) => {
+        const front = (
+          <>
+            <p className="text-trim absolute top-[62px] left-[35px] text-[24px] leading-[40px] whitespace-nowrap">{c.index}</p>
+            <h3 className={`text-trim absolute left-[35px] w-[265px] uppercase ${c.size}`} style={{ top: c.titleTop }}>
+              {c.title}
+            </h3>
+          </>
+        );
+        const face = `absolute inset-0 rounded-[20px] border-[20px] border-solid bg-ink font-display font-bold text-white ${c.border}`;
+        if (!("pattern" in c)) {
+          return (
+            <article key={c.index} className={`absolute h-[525px] w-[442px] ${face.replace("absolute inset-0 ", "")}`} style={{ left: c.left, top: c.top }}>
+              {front}
+            </article>
+          );
+        }
+        return (
+          <article
+            key={c.index}
+            tabIndex={0}
+            aria-label={`${c.title}: di chuột hoặc nhấn để lật`}
+            className="flip-card absolute h-[525px] w-[442px] outline-none"
+            style={{ left: c.left, top: c.top }}
+          >
+            <div className="flip-inner absolute inset-0">
+              <div className={`flip-face ${face}`}>{front}</div>
+              <div aria-hidden className={`flip-face flip-back overflow-hidden ${face}`}>
+                <div className="absolute inset-0 flex flex-col justify-center gap-0 overflow-hidden">
+                  {[0, 1, 2, 3, 4].map((r) => (
+                    <div key={r} className={`flip-row ${r % 2 ? "flip-row-right" : ""}`} style={{ animationDelay: `-${r * 3.7}s` }}>
+                      {[0, 1].map((k) => (
+                        <span key={k} className="shrink-0 pr-8 font-display text-[110px] leading-[96px] font-extrabold whitespace-nowrap text-white/18 uppercase">
+                          {c.pattern}
+                        </span>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+                <Image src={c.icon} alt="" width={279} height={123} className="flip-icon absolute top-1/2 left-1/2 -mt-[61.5px] -ml-[139.5px] max-w-none" />
+              </div>
+            </div>
+          </article>
+        );
+      })}
     </section>
   );
 }

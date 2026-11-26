@@ -1,8 +1,9 @@
-# Lưu Load V2 — Motion & Micro-interaction Spec (v0.2)
+# Lưu Load V2 — Motion & Micro-interaction Spec (v0.3)
 
 > Đọc kèm `docs/IMPLEMENTATION.md`. File này mô tả **hành vi** từng chuyển động, đủ để AI agent dựng mà không phải đoán.
 > Nguồn: 6 video tham chiếu chủ dự án gửi (26.11.2026), 3 component Framer Marketplace, ảnh trạng thái card (Default / Flip), ảnh tổng thể trang Community.
 > **v0.2 (26.11.2026, sau review của chủ dự án):** CTA chỉ còn 2 biến thể trắng/đen; Projects dùng 4 thumbnail có sẵn, giữ bố cục hiện tại; Community card viền đỏ, làm trước card 01; thêm Page transition (mục 11), Cursor trail ở Hero (mục 12), trang `/community` (mục 13). Hashtag giữ nguyên v0.1.
+> **v0.3 (26.11.2026, đã implement):** Page transition: vàng trái · đen viền trắng giữa · đỏ phải, tấm màu trơn. Cursor trail giữ trắng. Hero → Break dùng khung vòm. Nhóm 04 là "Kiến trúc & Cảnh quan" (slug giữ theo Sitemap). Ảnh Community dùng khối màu. Hashtag: mặt sau pill đổi thành **nền ink chữ vàng** (trắng không thấy trên nền section trắng). Projects bỏ snap (xung đột Lenis).
 > Thuật ngữ motion dùng theo glossary của Emil Kowalski (giữ tiếng Anh để tra cứu và prompt cho đúng).
 > Giá trị thời gian/easing là **đề xuất** đo từ video (15–60 fps); chỉnh lại khi review trên trình duyệt thật.
 

@@ -1,4 +1,6 @@
 import Image from "next/image";
+import type { CSSProperties } from "react";
+import { Reveal } from "@/components/motion/Reveal";
 import { breakSection } from "@/content/home";
 
 const display =
@@ -31,9 +33,9 @@ export function BreakSection() {
         {breakSection.line1} {breakSection.line2} {breakSection.line3}
       </h2>
 
-      <div aria-hidden>
+      <Reveal aria-hidden amount={0.35}>
         {/* Line 01 */}
-        <div className="absolute top-[137px] left-[189px] h-[149px] w-[1612px]">
+        <div data-reveal style={{ "--d": 0 } as CSSProperties} className="absolute top-[137px] left-[189px] h-[149px] w-[1612px]">
           <Image
             src="/assets/break/dot-square.svg"
             alt=""
@@ -52,7 +54,7 @@ export function BreakSection() {
         </div>
 
         {/* Line 02 */}
-        <div className="absolute top-[355px] left-[189px] h-[158px] w-[1612px]">
+        <div data-reveal style={{ "--d": 80 } as CSSProperties} className="absolute top-[355px] left-[189px] h-[158px] w-[1612px]">
           <p className={`${label} top-0 left-0`}>{breakSection.labelTop}</p>
           <p className={`${label} top-[137px] left-[184px]`}>{breakSection.labelBottom}</p>
           <p className={`${display} top-[9px] left-[493px]`}>{breakSection.line2}</p>
@@ -60,7 +62,7 @@ export function BreakSection() {
         </div>
 
         {/* Line 03 */}
-        <div className="absolute top-[577px] left-[189px] h-[160px] w-[1623px]">
+        <div data-reveal style={{ "--d": 160 } as CSSProperties} className="absolute top-[577px] left-[189px] h-[160px] w-[1623px]">
           <p className={`${display} top-0 left-0`}>{breakSection.line3}</p>
           <Image
             src="/assets/break/star.svg"
@@ -74,7 +76,7 @@ export function BreakSection() {
             {breakSection.caption}
           </p>
         </div>
-      </div>
+      </Reveal>
     </section>
   );
 }

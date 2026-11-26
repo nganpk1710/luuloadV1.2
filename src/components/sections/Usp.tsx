@@ -1,4 +1,6 @@
 import Image from "next/image";
+import type { CSSProperties } from "react";
+import { Reveal } from "@/components/motion/Reveal";
 import { PillLink } from "@/components/ui/PillLink";
 import { usp } from "@/content/sections";
 
@@ -19,9 +21,9 @@ export function Usp() {
         {usp.cta.label}
       </PillLink>
 
-      <div className="absolute top-[451px] left-0 flex h-[654px] w-[1920px]">
-        {usp.pillars.map((p) => (
-          <div key={p.id} className="w-[640px]">
+      <Reveal amount={0.2} className="absolute top-[451px] left-0 flex h-[654px] w-[1920px]">
+        {usp.pillars.map((p, i) => (
+          <div key={p.id} data-reveal style={{ "--d": i * 120 } as CSSProperties} className="usp-card group w-[640px]">
             <div className={`relative h-[95px] overflow-hidden ${p.head}`}>
               <div className="absolute top-1/2 left-8 flex w-[581px] -translate-y-1/2 items-center justify-between font-display text-[40px] leading-normal font-bold whitespace-nowrap uppercase">
                 <span className="text-trim">{p.index}</span>
@@ -32,20 +34,24 @@ export function Usp() {
               {p.id === "vision" && (
                 <Image src="/assets/usp/stripes.svg" alt="" width={640} height={559} className="absolute top-0 left-0 max-w-none" />
               )}
-              <div className={`absolute top-[52px] left-[92px] size-[456px] rounded-full ${p.outer}`} />
+              <div className={`usp-ring absolute top-[52px] left-[92px] size-[456px] rounded-full ${p.outer}`} />
               <div
-                className={`absolute top-[99px] left-[139px] size-[362px] rounded-full ${p.inner} ${p.id === "vision" ? "" : "!top-[118px] !left-[158px] !size-[324px]"}`}
+                className={`usp-core absolute top-[99px] left-[139px] size-[362px] rounded-full ${p.inner} ${p.id === "vision" ? "" : "!top-[118px] !left-[158px] !size-[324px]"}`}
               />
               {p.id === "vision" && (
                 <div className="absolute top-[206px] left-[225px] flex w-[189px] flex-col items-center gap-[46px]">
-                  <Image src="/assets/usp/brush.svg" alt="" width={65} height={65} />
-                  <p className="text-trim font-display text-[60px] leading-[107.273px] font-extrabold uppercase">{usp.visionCenter}</p>
+                  <Image src="/assets/usp/brush.svg" alt="" width={65} height={65} className="usp-icon" />
+                  <span className="block overflow-hidden py-[0.25em] -my-[0.25em]">
+                    <span className="usp-label text-trim block font-display text-[60px] leading-[107.273px] font-extrabold uppercase">
+                      {usp.visionCenter}
+                    </span>
+                  </span>
                 </div>
               )}
             </div>
           </div>
         ))}
-      </div>
+      </Reveal>
     </section>
   );
 }

@@ -1,4 +1,6 @@
 import Image from "next/image";
+import { CursorTrail } from "@/components/motion/CursorTrail";
+import { HeroToBreak } from "@/components/motion/HeroToBreak";
 import { hero, heroMarquee } from "@/content/home";
 
 /**
@@ -57,7 +59,7 @@ export function Hero() {
       </div>
 
       {/* Under info */}
-      <div className="absolute top-[840px] left-8 flex w-[1856px] items-center justify-between">
+      <div data-hero-fade className="absolute top-[840px] left-8 flex w-[1856px] items-center justify-between">
         <p className="text-trim text-[14px] leading-none font-medium text-white uppercase">
           {hero.scrollHint}
         </p>
@@ -73,13 +75,22 @@ export function Hero() {
             alt=""
             width={icon.size}
             height={icon.size}
+            data-hero-side={icon.left < 820 ? "left" : "right"}
             className="absolute max-w-none"
             style={{ left: icon.left, top: icon.top }}
           />
         ))}
         {/* Vòm rỗng viền vàng, giữa hàng icon (Figma node 2727:1131) */}
-        <div className="absolute top-[1328px] left-[820px] h-[230.765px] w-[281px] rounded-t-[999px] border-[20px] border-yellow" />
+        <div
+          data-arch
+          className="absolute top-[1328px] left-[820px] z-[6] h-[230.765px] w-[281px] rounded-t-[999px] border-[20px] border-yellow will-change-transform"
+        >
+          <div data-arch-fill className="absolute -inset-[20px] rounded-[inherit] bg-yellow [clip-path:inset(100%_0_0_0)]" />
+        </div>
       </div>
+
+      <CursorTrail />
+      <HeroToBreak />
     </section>
   );
 }

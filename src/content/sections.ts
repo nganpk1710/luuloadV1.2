@@ -7,13 +7,40 @@ const placeholder =
   "We solve for physics, budgets, timelines, and the curveballs. Every project reaches a moment where someone says";
 
 export const projects = {
-  index: "(01)",
-  eyebrowTitle: "Lock in",
   title: "thành quả sáng tạo",
   subtitle: "Từ những bản phác thảo đầu tiên đến các dự án thực chiến",
-  body: "We solve for physics, budgets, timelines, and the curveballs. Every project reaches a moment where someone says, “That’s impossible.” That’s usually when we start having fun. Our job is to make sure it not only works, but works flawlessly, repeatedly, and invisibly.",
   cta: { label: "Xem tất cả", href: "/gallery" },
-  image: { src: "/assets/images/projects/project-showcase.png", alt: "Hậu trường dự án sân khấu ánh sáng" },
+  /** Nội dung tạm (MOTION mục 4), thay khi có thông tin dự án thật. Ảnh 736 × 460. */
+  items: [
+    {
+      index: "(01)",
+      name: "BaoBao",
+      body: "Bộ nhận diện cho thương hiệu gốm ăn uống, lấy dáng chén bát quen thuộc làm hình khối chính. Mỗi bữa cơm là một khoảnh khắc đáng giữ lại.",
+      image: "/assets/images/features/project-feature-01.png",
+      alt: "BaoBao: poster nhận diện với chén bát cách điệu trên nền xanh và vàng",
+    },
+    {
+      index: "(02)",
+      name: "Nhịp bước",
+      body: "Minh họa nhân vật từ những sắc màu lễ hội đường phố. Đường nét bo tròn, màu phẳng, chuyển động vui như một buổi chợ phiên.",
+      image: "/assets/images/features/project-feature-02.png",
+      alt: "Nhịp bước: minh họa nhân vật đội nón, quần sọc trên nền đỏ",
+    },
+    {
+      index: "(03)",
+      name: "Culture Week 2025",
+      body: "Hệ thống hình ảnh cho Vietnam Culture Week 2025: chữ ghép từ họa tiết cổ, đặt cạnh điêu khắc đá truyền thống.",
+      image: "/assets/images/features/project-feature-03.png",
+      alt: "Vietnam Culture Week 2025: chữ ghép họa tiết trên nền đỏ cạnh tượng đá",
+    },
+    {
+      index: "(04)",
+      name: "Kéo co",
+      body: "Bộ minh họa Nghi lễ và Trò chơi kể lại trò kéo co qua nét vẽ dân gian và màu tranh Đông Hồ.",
+      image: "/assets/images/features/project-feature-04.png",
+      alt: "Kéo co: minh họa dân gian cảnh kéo co, chữ Nghi lễ và Trò chơi",
+    },
+  ],
 } as const;
 
 export const usp = {
@@ -46,7 +73,7 @@ export const community = {
   paragraphRight: placeholder,
   cta: { label: "Kết nối ngay", href: "/connect" },
   cards: [
-    { index: "(01)", title: "nghệ thuật & chế tác", border: "border-red", left: 32, top: 560, titleTop: 326, size: "text-[60px] leading-[68.387px]" },
+    { index: "(01)", title: "nghệ thuật & chế tác", pattern: "NGHE THUAT & CHE TAC", icon: "/assets/cards/community/eye.svg", border: "border-red", left: 32, top: 560, titleTop: 326, size: "text-[60px] leading-[68.387px]" },
     { index: "(02)", title: "Đời sống & phong vị", border: "border-yellow", left: 504, top: 564, titleTop: 326, size: "text-[60px] leading-[68.387px]" },
     { index: "(03)", title: "Dòng chảy & Cõi thiêng", border: "border-blue", left: 976, top: 564, titleTop: 313, size: "text-[64px] leading-[70px]" },
     { index: "(04)", title: "kiến trúc & cảnh quan", border: "border-amber", left: 1448, top: 564, titleTop: 313, size: "text-[64px] leading-[70px]" },

@@ -76,3 +76,346 @@ body {
     scroll-behavior: auto;
   }
 }
+
+/* ---------- Motion (docs/MOTION.md) ---------- */
+:root {
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Roll text (mục 1) */
+.roll-char {
+  display: inline-block;
+  overflow: hidden;
+  line-height: 1;
+  padding-block: 0.24em 0.08em;
+  margin-block: -0.24em -0.08em;
+}
+.roll-inner {
+  position: relative;
+  display: block;
+  transition: transform 260ms var(--ease-out);
+  transition-delay: calc(var(--r) * 18ms);
+}
+.roll-copy {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 0.4em);
+}
+.group:hover .roll-inner,
+.group:focus-visible .roll-inner {
+  transform: translateY(calc(-100% - 0.4em));
+  transition-delay: calc(var(--i) * 18ms);
+}
+
+/* Roll pill (mục 2) */
+.roll-pill {
+  transition: scale 380ms var(--ease-spring);
+}
+.roll-pill:hover {
+  scale: 1.04;
+}
+.roll-pill:active {
+  scale: 0.96;
+  transition-duration: 100ms;
+}
+.roll-pill-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 420ms var(--ease-spring);
+}
+.roll-pill-back {
+  transform: translateY(100%) scaleY(0.6);
+}
+.roll-pill:hover .roll-pill-front,
+.roll-pill:focus-visible .roll-pill-front {
+  transform: translateY(-100%) scaleY(0.6);
+}
+.roll-pill:hover .roll-pill-back,
+.roll-pill:focus-visible .roll-pill-back {
+  transform: translateY(0) scaleY(1);
+}
+
+/* Underline link (mục 10) */
+.underline-link {
+  position: relative;
+}
+.underline-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 200ms var(--ease-out);
+}
+.underline-link:hover::after,
+.underline-link:focus-visible::after {
+  transform: scaleX(1);
+  transform-origin: left;
+  transition-duration: 240ms;
+}
+
+/* Reveal khi vào viewport: phần tử có data-reveal, cha Reveal gắn data-shown */
+[data-reveal] {
+  opacity: 0;
+  translate: 0 var(--reveal-y, 60px);
+  transition:
+    opacity 600ms var(--ease-out),
+    translate 600ms var(--ease-out);
+  transition-delay: calc(var(--d, 0) * 1ms);
+}
+[data-shown] [data-reveal],
+[data-shown][data-reveal] {
+  opacity: 1;
+  translate: 0 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roll-inner,
+  .roll-pill,
+  .roll-pill-face,
+  .underline-link::after {
+    transition: none !important;
+  }
+  .roll-pill-face {
+    transition: opacity 150ms !important;
+  }
+  .roll-pill-back {
+    transform: none;
+    opacity: 0;
+  }
+  .roll-pill:hover .roll-pill-front {
+    transform: none;
+  }
+  .roll-pill:hover .roll-pill-back {
+    opacity: 1;
+  }
+  [data-reveal] {
+    opacity: 1;
+    translate: none;
+    transition: none;
+  }
+}
+
+/* Footer wordmark roll (mục 9) */
+.wordmark {
+  overflow: hidden;
+}
+.wordmark-glyph {
+  transform: translateY(300px);
+  transition: transform 320ms var(--ease-out);
+}
+.wordmark[data-shown] .wordmark-glyph {
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .wordmark-glyph {
+    transform: none;
+    transition: none;
+  }
+}
+
+/* USP reveal (mục 5) */
+.usp-ring,
+.usp-core {
+  scale: 0.85;
+  transition: scale 700ms var(--ease-out) 100ms;
+}
+[data-shown] .usp-ring,
+[data-shown] .usp-core {
+  scale: 1;
+}
+[data-shown] .usp-card:hover .usp-core {
+  scale: 1.04;
+  transition: scale 420ms var(--ease-spring);
+}
+.usp-icon {
+  opacity: 0;
+  transform: scale(0.6) rotate(-20deg);
+  transition:
+    opacity 200ms var(--ease-out),
+    transform 200ms var(--ease-out) 40ms;
+}
+.usp-label {
+  transform: translateY(110%);
+  transition: transform 200ms var(--ease-out);
+}
+.usp-card:hover .usp-icon {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 250ms var(--ease-out),
+    transform 480ms var(--ease-spring);
+}
+.usp-card:hover .usp-label {
+  transform: none;
+  transition: transform 320ms var(--ease-out) 60ms;
+}
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .usp-icon,
+  .usp-label {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Hashtag pill hover (mục 7): lật theo trục X sang mặt trắng + nghiêng nhẹ */
+.hashtag-pill {
+  perspective: 900px;
+  transition: rotate 520ms var(--ease-spring);
+}
+.hashtag-pill:hover {
+  z-index: 2;
+  rotate: var(--tilt);
+}
+.hashtag-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  backface-visibility: hidden;
+  transition: transform 560ms var(--ease-spring);
+}
+.hashtag-back {
+  transform: rotateX(-180deg);
+}
+.hashtag-pill:hover .hashtag-front {
+  transform: rotateX(180deg);
+}
+.hashtag-pill:hover .hashtag-back {
+  transform: rotateX(0deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .hashtag-pill,
+  .hashtag-face {
+    transition: none;
+  }
+}
+
+/* Community flip card (mục 8) */
+.flip-card {
+  perspective: 1200px;
+}
+.flip-inner {
+  transform-style: preserve-3d;
+  transition: transform 700ms var(--ease-in-out);
+}
+.flip-card:hover .flip-inner,
+.flip-card:focus-visible .flip-inner {
+  transform: rotateY(180deg);
+}
+.flip-face {
+  backface-visibility: hidden;
+}
+.flip-back {
+  transform: rotateY(180deg);
+}
+.flip-row {
+  display: flex;
+  width: max-content;
+  animation: flip-marquee 22s linear infinite;
+  animation-play-state: paused;
+}
+.flip-row-right {
+  animation-direction: reverse;
+}
+.flip-card:hover .flip-row,
+.flip-card:focus-visible .flip-row {
+  animation-play-state: running;
+}
+@keyframes flip-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.flip-icon {
+  scale: 0.6;
+  opacity: 0;
+  transition:
+    scale 200ms var(--ease-out),
+    opacity 150ms;
+}
+.flip-card:hover .flip-icon,
+.flip-card:focus-visible .flip-icon {
+  scale: 1;
+  opacity: 1;
+  transition:
+    scale 520ms var(--ease-spring) 350ms,
+    opacity 200ms 350ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  .flip-inner {
+    transition: none;
+  }
+  .flip-row {
+    animation: none;
+  }
+}
+
+/* Community hero (mục 13 · 1) */
+@keyframes ch-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.6) rotate(0deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(var(--rot));
+  }
+}
+@keyframes ch-rise {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+}
+@keyframes ch-line {
+  from {
+    transform: translateY(110%);
+  }
+}
+@keyframes ch-float {
+  from {
+    transform: translateY(-8px);
+  }
+  to {
+    transform: translateY(8px);
+  }
+}
+.ch-pop {
+  transform: rotate(var(--rot));
+  animation: ch-pop 700ms var(--ease-spring) both;
+  animation-delay: calc(var(--d) * 1ms);
+}
+.ch-rise {
+  animation: ch-rise 700ms var(--ease-out) both;
+  animation-delay: calc(var(--d) * 1ms);
+}
+.ch-line {
+  animation: ch-line 800ms var(--ease-out) both;
+  animation-delay: calc(var(--d) * 1ms);
+}
+.ch-float {
+  animation: ch-float 3s ease-in-out infinite alternate;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ch-pop,
+  .ch-rise,
+  .ch-line,
+  .ch-float {
+    animation: none;
+  }
+}

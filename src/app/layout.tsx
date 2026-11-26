@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { PageTransition } from "@/components/motion/PageTransition";
+import { SmoothScroll } from "@/components/motion/SmoothScroll";
 import { smoochSans } from "@/lib/fonts";
 import "./globals.css";
 
@@ -11,7 +13,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="vi" className={smoochSans.variable}>
-      <body className="min-h-screen">{children}</body>
+      <body className="min-h-screen">
+        <SmoothScroll />
+        <PageTransition>{children}</PageTransition>
+      </body>
     </html>
   );
 }
