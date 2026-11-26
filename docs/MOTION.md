@@ -1,7 +1,8 @@
-# Lưu Load V2 — Motion & Micro-interaction Spec (v0.1)
+# Lưu Load V2 — Motion & Micro-interaction Spec (v0.2)
 
 > Đọc kèm `docs/IMPLEMENTATION.md`. File này mô tả **hành vi** từng chuyển động, đủ để AI agent dựng mà không phải đoán.
-> Nguồn: 4 video tham chiếu chủ dự án gửi (26.11.2026), 3 component Framer Marketplace, 2 ảnh trạng thái card (Default / Flip).
+> Nguồn: 6 video tham chiếu chủ dự án gửi (26.11.2026), 3 component Framer Marketplace, ảnh trạng thái card (Default / Flip), ảnh tổng thể trang Community.
+> **v0.2 (26.11.2026, sau review của chủ dự án):** CTA chỉ còn 2 biến thể trắng/đen; Projects dùng 4 thumbnail có sẵn, giữ bố cục hiện tại; Community card viền đỏ, làm trước card 01; thêm Page transition (mục 11), Cursor trail ở Hero (mục 12), trang `/community` (mục 13). Hashtag giữ nguyên v0.1.
 > Thuật ngữ motion dùng theo glossary của Emil Kowalski (giữ tiếng Anh để tra cứu và prompt cho đúng).
 > Giá trị thời gian/easing là **đề xuất** đo từ video (15–60 fps); chỉnh lại khi review trên trình duyệt thật.
 
@@ -33,6 +34,8 @@ src/components/motion/
   Marquee.tsx           // Hashtag (mục 6)
   FlipCard.tsx          // Community (mục 8)
   UnderlineLink.tsx     // Footer legal (mục 10)
+  PageTransition.tsx    // TransitionProvider + overlay dải tấm màu (mục 11)
+  CursorTrail.tsx       // Hero, Community hero (mục 12)
 src/lib/motion.ts       // easing, spring, duration tokens + hook useReducedMotion
 ```
 
@@ -74,18 +77,16 @@ src/lib/motion.ts       // easing, spring, duration tokens + hook useReducedMoti
 - Hover: `front` → `translateY(-100%) scaleY(0.6)`; `back` từ `translateY(100%) scaleY(0.6)` → `translateY(0) scaleY(1)`. Dùng spring `{ stiffness: 520, damping: 22 }` để có overshoot ~4%.
 - Toàn bộ nút `scale(1 → 1.04)` khi hover, spring cùng tham số, để có cảm giác pill "phồng lên" như video.
 - **Press feedback:** `:active` → `scale(0.96)`, 100ms.
-- Màu hover theo palette Lưu Load, xoay vòng theo vị trí nút:
+- **Chỉ 2 biến thể** (chốt 26.11):
 
-| Nút | Mặc định | Hover (`back`) |
-|---|---|---|
-| Header `KẾT NỐI NGAY` | nền white, chữ ink | nền yellow, chữ ink |
-| `XEM TẤT CẢ` (Projects) | nền ink, chữ white | nền red, chữ white |
-| `BUTTON` (USP) | nền ink, chữ white | nền blue, chữ white |
-| `KẾT NỐI NGAY` (Community) | nền ink, chữ white | nền amber, chữ ink |
-| `KẾT NỐI NGAY` (Last CTA) | nền white, chữ ink | nền yellow, chữ ink |
+| Biến thể | Mặc định | Hover (`back`) | Dùng ở |
+|---|---|---|---|
+| `light` | nền white, chữ ink | **nền yellow, chữ ink** | Header, Last CTA |
+| `dark` | nền ink, chữ white | **nền white, viền 2px ink, chữ ink** | Projects, USP, Community |
 
+- Biến thể `dark` để sẵn `border: 2px solid` màu ink ở cả mặt trước để khi đổi sang mặt trắng không bị nhảy kích thước (viền trùng màu nền nên không thấy).
 - Chữ trên pill **không** roll riêng (khác Menu item) để hai hiệu ứng không chồng nhau.
-- Thay `PillLink` hiện tại bằng `RollPill` nhưng giữ nguyên API (`variant`, `href`, `className`) + thêm prop `hoverTone`.
+- Thay `PillLink` hiện tại bằng `RollPill` nhưng giữ nguyên API (`variant`, `href`, `className`) (không cần prop màu riêng).
 
 ---
 
@@ -117,32 +118,36 @@ src/lib/motion.ts       // easing, spring, duration tokens + hook useReducedMoti
 
 ## 4. Projects section — 3D vertical cylinder carousel
 
-**Tham chiếu chính:** video `Feature_projects.mp4`. Tham chiếu phụ: Framer *Scroll 3D Slider* (preset carousel/coverflow, chạy Three.js; chỉ mượn ý snap và counter, **không** dùng Three.js).
+**Tham chiếu chính:** video `Feature_projects.mp4`. Tham chiếu phụ: Framer *Scroll 3D Slider* (chỉ mượn ý snap; **không** dùng Three.js).
+
+**Chốt 26.11:** giữ **bố cục section hiện tại** (tiêu đề + subtitle + nút bên trái, `(01)` + tên + mô tả bên phải). Chỉ thay khung ảnh giữa bằng carousel 3D gồm **4 thumbnail** có sẵn trong repo. Không thêm tiêu đề/nhãn lên ảnh. Không thêm danh sách bước bên trái như video.
 
 **Quan sát từ video:**
-- Section được **pin**. Một cột ảnh dự án nằm trên một **hình trụ nằm ngang** (quay quanh trục X).
-- Ảnh đang active ở giữa: phẳng, to nhất.
-- Ảnh phía trên: nghiêng ra sau, nhìn như hình thang **trên rộng – dưới hẹp**; ảnh phía dưới ngược lại (**trên hẹp – dưới rộng**). Có **perspective** mạnh.
-- Scroll xuống → toàn bộ hình trụ xoay, ảnh dưới lăn lên thành active, ảnh active lăn lên trên và nghiêng đi.
-- Cột phải: số thứ tự `001/002/003/004` + tiêu đề (`DISCOVER → PROTOTYPE → LOCK IN → PERFECT IT`) + đoạn mô tả, đổi theo ảnh active. Tiêu đề mới hiện màu xám nhạt rồi đậm dần (**crossfade**), đoạn mô tả mờ vào.
-- Cột trái: danh sách 4 bước, bước active đậm, các bước khác xám.
+- Section được **pin**. Ảnh nằm trên một **hình trụ nằm ngang** (quay quanh trục X).
+- Ảnh active ở giữa: phẳng, to nhất. Ảnh phía trên: hình thang **trên rộng – dưới hẹp**; ảnh phía dưới ngược lại. **Perspective** mạnh.
+- Scroll xuống → trụ xoay, ảnh dưới lăn lên thành active.
+- Tiêu đề bên phải đổi theo ảnh active, chữ mới hiện xám rồi đậm dần (**crossfade**), mô tả mờ vào sau.
 
-**Thuật ngữ:** **Scroll-driven animation** + **Pin** + **3D tilt / Flip** (`rotateX`) trên **Perspective**, chuyển nội dung bằng **Crossfade**; tuỳ chọn **snap** vào từng ảnh.
+**Thuật ngữ:** **Scroll-driven animation** + **Pin** + **3D tilt / Flip** (`rotateX`) trên **Perspective**, nội dung đổi bằng **Crossfade**, có **snap**.
+
+**Dữ liệu (`src/content/sections.ts → projects.items`), nội dung đề xuất:**
+
+| # | Ảnh | Tên (cột phải) | Mô tả (cột phải) |
+|---|---|---|---|
+| (01) | `images/features/project-feature-01.png` | BaoBao | Bộ nhận diện cho thương hiệu gốm ăn uống, lấy dáng chén bát quen thuộc làm hình khối chính. Mỗi bữa cơm là một khoảnh khắc đáng giữ lại. |
+| (02) | `images/features/project-feature-02.png` | Nhịp bước | Minh họa nhân vật từ những sắc màu lễ hội đường phố. Đường nét bo tròn, màu phẳng, chuyển động vui như một buổi chợ phiên. |
+| (03) | `images/features/project-feature-03.png` | Vietnam Culture Week 2025 | Hệ thống hình ảnh cho tuần lễ văn hóa: chữ ghép từ họa tiết cổ, đặt cạnh điêu khắc đá truyền thống. |
+| (04) | `images/features/project-feature-04.png` | Kéo co | Bộ minh họa "Nghi lễ và Trò chơi" kể lại trò kéo co qua nét vẽ dân gian và màu tranh Đông Hồ. |
+
+Tên và mô tả là **nội dung tạm** do Claude đặt, chỉnh trong file content khi có thông tin dự án thật.
 
 **Dựng:**
-- Khung ảnh 760 × ~460 mỗi ảnh (theo Figma, cột giữa rộng 760). `perspective: 1400px` trên khung chứa, `transform-style: preserve-3d`.
-- Đặt N ảnh trên trụ: góc mỗi ảnh `θ = 360/N` (hoặc cố định 38° khi chỉ có 4–6 ảnh, để trụ không khép kín), bán kính `r ≈ 520px`. Mỗi ảnh: `rotateX(-i·θ) translateZ(r)`.
-- Scroll điều khiển `rotateX` của cả trụ: `0 → (N-1)·θ`. Pin dài `N × 100vh`.
-- Ảnh không active: `opacity 0.9`, có thể thêm `filter: brightness(0.85)`; ảnh active `1`.
-- Snap: `ScrollTrigger snap: 1/(N-1)`, duration 0.4, ease-in-out.
-- Cột phải và trái đổi nội dung khi `activeIndex` đổi: tiêu đề cũ **fade out + translateY(-12px)**, tiêu đề mới **fade in từ translateY(12px)**, 300ms ease-out, mô tả trễ 60ms.
-- Nút `XEM TẤT CẢ` giữ cố định ở cột trái suốt thời gian pin.
-
-**Thiếu nội dung (cần chủ dự án gửi):**
-- Ảnh từng dự án riêng lẻ (hiện chỉ có 1 ảnh chụp ghép từ Figma). Đề xuất 4–6 ảnh tỉ lệ ~16:10, ≥1600px.
-- Tiêu đề + mô tả cho từng mục (Figma mới có `(01) LOCK IN`).
-
----
+- Khung giữa giữ vị trí Figma (`left 580`, rộng 760, cao 793.67). Mỗi ảnh hiển thị **760 × 475** (tỉ lệ gốc 736 × 460 ≈ 16:10), `border-radius: 0`, `object-fit: cover`.
+- `perspective: 1400px`, `transform-style: preserve-3d`. Góc giữa 2 ảnh `θ = 38°`, bán kính `r ≈ 560px`. Ảnh i: `rotateX(-i·θ) translateZ(r)`.
+- Scroll xoay cả trụ `rotateX: 0 → 3·θ`. Pin dài **4 × 100vh**. Snap `1/3`, 0.4s ease-in-out.
+- Ảnh không active: `opacity 0.85`.
+- Cột phải đổi khi `activeIndex` đổi: số thứ tự + tên **fade out, translateY(-12px)** → mới **fade in từ translateY(12px)**, 300ms ease-out, mô tả trễ 60ms. Cột trái giữ nguyên trong suốt thời gian pin.
+- Ảnh gốc chỉ rộng 736px, hiển thị 760px sẽ hơi mềm. Nên có bản ≥1520px (2×) cho màn retina.
 
 ## 5. USP — Card Tầm nhìn: reveal khi hover
 
@@ -222,9 +227,9 @@ src/lib/motion.ts       // easing, spring, duration tokens + hook useReducedMoti
 - Rời chuột: lật về `0°`, pattern dừng sau khi mặt trước đã hiện.
 - Bàn phím / cảm ứng: card là `button` có `aria-pressed`, focus/tap để lật.
 
-**Mâu thuẫn cần xác nhận:** ảnh `Flip_card.png` có viền **vàng** nhưng chữ là "NGHỆ THUẬT & CHẾ TÁC", trong khi trên Figma card 01 viền **đỏ**, card viền vàng là "Đời sống & phong vị". Spec đang theo quy tắc **mặt sau giữ viền của mặt trước**.
+**Chốt 26.11:** card `(01) Nghệ thuật & chế tác` dùng **viền đỏ** ở cả 2 mặt. **Làm card này trước**; 3 card còn lại giữ tĩnh cho tới khi có icon riêng.
 
-**Thiếu asset:** icon mặt sau cho từng card (hiện chỉ thấy con mắt trong ảnh mẫu). Cần 4 SVG, hoặc 1 icon dùng chung.
+**Asset:** icon con mắt chưa có file SVG. Claude vẽ lại theo ảnh mẫu (`assets/community/eye.svg`: nửa trên blue, nửa dưới yellow, tròng ink), chủ dự án thay bằng file gốc nếu có.
 
 ---
 
@@ -256,19 +261,103 @@ src/lib/motion.ts       // easing, spring, duration tokens + hook useReducedMoti
 
 ---
 
-## 11. Thứ tự triển khai đề xuất
+## 11. Page transition — Shape transform (theo slush.app)
+
+**Tham chiếu:** video `2026-11-26_21-35-27` (slush.app: từ Download sang User Guides).
+
+**Quan sát từ video (10 fps):**
+1. Bấm link nav → trang hiện tại **thu nhỏ** thành một tấm card giữa màn hình (~1/3 bề rộng), nền phía sau chuyển đen.
+2. Hai bên card xuất hiện các **tấm màu phẳng** (vàng, xanh, tím) xếp thành một dải ngang, các tấm ở rìa **nghiêng 3D** như nằm trên mặt trong của một hình trụ đứng (hình thang mở rộng ra mép màn hình).
+3. Cả dải **trượt ngang** sang trái; tấm của trang mới (trắng, trống) trượt vào giữa. Khoảng 600–700ms.
+4. Tấm mới **phóng to** phủ kín viewport (~300ms), nav giữ nguyên trên cùng suốt quá trình.
+5. Nội dung trang mới hiện theo thứ tự: tiêu đề **reveal** từ trái sang phải (chữ xám → đen như bị quét mask), rồi icon **pop in**, rồi nút **fade in** lần lượt (**stagger**).
+
+**Thuật ngữ:** **Page transition** gồm **Scale** (out) → **Translate** trên **Perspective** (dải tấm 3D, gần **Carousel/Coverflow**) → **Scale** (in) theo kiểu **Shared element transition**, kết thúc bằng **Stagger** các **Reveal / Pop in**. Toàn bộ là một **Orchestration**.
+
+**Áp dụng cho Lưu Load:**
+- Tấm màu dùng palette: yellow, red, blue, amber, sky; trên mỗi tấm đặt **một shape thương hiệu** (icon trong `assets/slider/*`) màu ink, cỡ ~40% tấm, để "shape transform" mang dấu Lưu Load thay vì tấm trơn.
+- Thứ tự tấm cố định theo route để có **direction-aware**: đi sang route đứng sau trong nav (Home → Các dự án → Cộng đồng → Về chúng tôi) thì dải trượt sang trái, đi lùi thì trượt sang phải.
+- Thời lượng: thu nhỏ 350ms (ease-in-out) → trượt 600ms (ease-in-out) → phóng to 350ms (ease-out). Tổng ≈ 1.3s, nội dung mới bắt đầu stagger từ 1.1s.
+- Header (logo + nav) **không** tham gia transition, luôn nằm trên cùng.
+
+**Kỹ thuật (Next.js 16 App Router):**
+- `TransitionProvider` (client) bọc layout, chặn click vào `<Link>` nội bộ: chụp trang hiện tại thành lớp `fixed` (dùng chính DOM hiện tại, không screenshot), chạy pha out, gọi `router.push`, khi trang mới mount thì chạy pha in.
+- Trước khi viết, đọc `node_modules/next/dist/docs/` mục View Transitions: nếu bản 16.4 hỗ trợ ổn định `viewTransition` thì dùng cho pha scale, còn dải tấm màu vẫn là overlay riêng.
+- Back/forward của trình duyệt: chạy bản rút gọn (chỉ crossfade 250ms) để không chặn điều hướng.
+- Reduced motion: crossfade 200ms, không có dải tấm.
+
+---
+
+## 12. Hero — Cursor trail icon (theo acronym.lol/process)
+
+**Tham chiếu:** video `2026-11-26_21-33-27` (acronym.lol/process, khối "PROCESS" nền vàng).
+
+**Quan sát:**
+- Di chuột trong khối → một **vệt icon nhỏ** sinh ra dọc theo đường đi của chuột, cách đều nhau.
+- Icon lặp theo một chuỗi cố định (mặt trời, tam giác, chữ…), cùng màu (xanh đậm trên nền vàng), cỡ nhỏ (~20–24px ở màn 1920).
+- Icon cũ **mờ dần và thu nhỏ** rồi biến mất sau khoảng nửa giây; đứng yên chuột thì vệt tự tan hết.
+- Có hiện tượng icon xuất hiện hơi nhấp nháy (**stepped**), không trượt mượt theo chuột: mỗi icon đứng yên tại chỗ nó được sinh ra.
+
+**Thuật ngữ:** cursor trail = chuỗi **Enter / Exit** sinh theo vị trí chuột: mỗi icon **Pop in** rồi **Fade out + Scale** về 0. Không có thuật ngữ riêng trong glossary; gần nhất là **Stagger** theo không gian thay vì thời gian.
+
+**Áp dụng cho Lưu Load:**
+- Phạm vi: **chỉ trong Hero** (1920 × 1680). Ra khỏi Hero thì dừng sinh icon.
+- Icon: 8 file `assets/cursor-trail/icon-*.svg` (viewBox 48, fill trắng). Sinh lần lượt theo thứ tự file, hết thì lặp lại.
+- Màu: đổi fill sang **yellow** (`#F9EE16`) cho đồng bộ tiêu đề Hero trên nền ink. Phương án khác: xoay vòng palette (yellow, red, blue, sky, amber) mỗi icon.
+- Cỡ hiển thị **32px**. Sinh 1 icon mỗi khi chuột đi được **≥ 56px** (tính theo khoảng cách, không theo thời gian, để chuột chậm không dồn icon).
+- Mỗi icon: `scale 0.4 → 1` trong 120ms (ease-out), giữ 280ms, rồi `opacity 1 → 0`, `scale 1 → 0.6` trong 300ms. Tối đa 16 icon cùng lúc (pool tái sử dụng phần tử, không tạo DOM mới liên tục).
+- Icon xoay ngẫu nhiên nhẹ ±12° để vệt bớt cứng.
+- Không sinh khi chuột đang ở trên nút/link (nav, CTA) để không che chữ.
+- Tắt trên thiết bị cảm ứng (`hover: none`) và khi reduced motion.
+- Dựng bằng `requestAnimationFrame` + `transform` trên lớp `pointer-events: none`, không dùng state React cho từng icon.
+
+---
+
+## 13. Trang `/community` — Tổng quan bốn nhóm
+
+**Nguồn:** ảnh `Overall_Community.png` (nội dung, thứ tự section). **Hình thức** theo hệ thống thương hiệu trong `docs/IMPLEMENTATION.md` mục 2 (màu palette, Smooch Sans cho display, SVN-Gilroy cho body, grid 12 cột 1920), không theo font serif/màu be của ảnh mẫu. Dựng ở 1920 trước, giống trang chủ.
+
+**Cấu trúc (từ trên xuống):**
+
+| # | Section | Nội dung (theo ảnh) | Hình thức Lưu Load | Motion |
+|---|---|---|---|---|
+| 0 | Header | Dùng chung Header trang chủ, mục "Cộng đồng" ở trạng thái active (gạch chân đỏ như ảnh). | Như trang chủ. | Roll text (mục 1). |
+| 1 | Hero | Eyebrow `LƯU LOAD COMMUNITY`, tiêu đề "Make it together.", câu phụ "A gathering place for the works, questions, and people of a more creative Việt Nam." Xung quanh là **6 ảnh dọc nghiêng** (−8° đến +10°) rải tự do. | Nền **yellow**, tiêu đề Smooch Sans ExtraBold ink cỡ ~240px uppercase, eyebrow + câu phụ Gilroy 24px. Ảnh có viền trắng 12px như ảnh in. | Ảnh **float** nhẹ (±8px, 6s, alternate) và **parallax** theo scroll (mỗi ảnh tốc độ khác). Vào trang: ảnh **pop in** stagger 80ms, tiêu đề reveal từ dưới lên trong mask. Cursor trail (mục 12) có thể bật lại ở đây. |
+| 2 | Intro | Eyebrow nhỏ + tiêu đề 2 dòng "Build a practice / with room to grow." | Nền white, tiêu đề Smooch Sans 120px, cột trái 5/12. | Scroll reveal: từng dòng trượt lên trong mask, stagger 100ms. |
+| 3 | Danh sách 4 nhóm | 4 hàng: số `01`–`04` cỡ lớn bên trái, tên nhóm + mô tả ngắn + link "Explore the stories" ở giữa, mũi tên → bên phải. Các hàng ngăn bằng đường kẻ mảnh. Hàng 02 trong ảnh có thumbnail. | Số và tên nhóm Smooch Sans, mô tả Gilroy. Mỗi hàng mang màu nhóm như trang chủ: 01 red, 02 yellow, 03 blue, 04 amber (dùng cho số và nền hover). Đường kẻ 1px ink/15%. Link tới `/community/:nhom`. | Hover hàng: nền hàng **fill màu nhóm từ dưới lên** (`scaleY` của lớp nền, 350ms ease-out), **thumbnail của nhóm reveal** (clip-path mở từ giữa) cạnh tên, mũi tên **translateX(+12px)** và xoay −45°. Đúng như hàng 02 trong ảnh là trạng thái hover. |
+| 4 | Banner | Ảnh full-width (tay dệt thổ cẩm), câu lớn ở giữa "We shape space into purpose." | Ảnh cao ~900px, phủ lớp ink 30% để chữ đọc được, chữ Smooch Sans 160px yellow. | **Scroll-driven**: ảnh `scale 1.15 → 1` khi cuộn qua (parallax zoom), chữ reveal từng dòng. |
+| 5 | Footer | Dùng chung Footer trang chủ. | Như trang chủ. | Wordmark roll + underline links (mục 9, 10). |
+
+**Bốn nhóm (copy theo ảnh, slug theo Sitemap):**
+
+| # | Tên | Mô tả | Slug |
+|---|---|---|---|
+| 01 | Nghệ thuật & Chế tác | Art, craft, materials, and the pleasure of making. | `nghe-thuat-che-tac` |
+| 02 | Đời sống & Phong vị | Everyday rituals, food, fashion, and the details that make a place feel lived in. | `doi-song-phong-vi` |
+| 03 | Dòng chảy & Cõi thiêng | Stories, beliefs, music, and the living currents that connect us. | `dong-chay-coi-thieng` |
+| 04 | Dấu ấn Không gian | Architecture, landscape, and the spaces that hold memory. | `di-san-kien-truc-canh-quan` |
+
+**Điểm lệch cần chốt:**
+- Nhóm 04: ảnh ghi "Dấu ấn Không gian", trang chủ ghi "Kiến trúc & cảnh quan", Sitemap ghi slug `di-san-kien-truc-canh-quan`.
+- Ngôn ngữ: ảnh dùng tiếng Anh cho tiêu đề và mô tả; Brand Copywriting Guideline đề xuất tiêu đề `/community` là "Chọn một nhóm để bắt đầu". Spec đang giữ đúng copy của ảnh.
+- Ảnh: cần 6 ảnh cho Hero, 4 thumbnail nhóm, 1 ảnh banner, độ phân giải ≥ 2× khung hiển thị. Trong lúc chờ, dùng khối màu palette làm placeholder.
+
+---
+
+## 14. Thứ tự triển khai đề xuất
 
 | Bước | Hạng mục | Lý do |
 |---|---|---|
 | 1 | `src/lib/motion.ts`, Lenis + ScrollTrigger setup, reduced-motion hook | Nền tảng cho mọi mục sau |
-| 2 | RollText (mục 1, 9), UnderlineLink (10), RollPill (2) | Nhỏ, dùng lại nhiều nơi |
-| 3 | Marquee + pill hover (6, 7), USP reveal (5), FlipCard (8) | Độc lập từng section |
-| 4 | HeroToBreak (3) | Pin + morph, cần chỉnh nhiều trên trình duyệt |
-| 5 | ProjectsCylinder (4) | Phụ thuộc ảnh và copy từ chủ dự án |
+| 2 | RollText (1, 9), UnderlineLink (10), RollPill 2 biến thể (2) | Nhỏ, dùng lại nhiều nơi |
+| 3 | Cursor trail (12), Marquee + pill hover (6, 7), USP reveal (5), FlipCard card 01 (8) | Độc lập từng section |
+| 4 | ProjectsCylinder với 4 thumbnail (4) | Đã đủ asset |
+| 5 | HeroToBreak (3) | Pin + morph, cần chỉnh nhiều trên trình duyệt |
+| 6 | Trang `/community` tĩnh (13), rồi motion của trang | Cần chốt copy và ảnh |
+| 7 | Page transition (11) | Cần ít nhất 2 trang thật để kiểm tra |
 
-## 12. Câu hỏi mở
+## 15. Câu hỏi mở
 
 1. Mục 3: shape giữa Hero có đúng là khung vòm viền vàng `2727:1131` không?
-2. Mục 4: ảnh và nội dung (tiêu đề, mô tả) của từng dự án, số lượng 4 hay nhiều hơn?
-3. Mục 8: mặt sau giữ viền theo card (đỏ/vàng/xanh/amber) hay dùng vàng chung như ảnh mẫu? Icon mặt sau cho từng card?
-4. Mục 2: bảng màu hover của từng nút có ổn không?
+2. Mục 12: icon cursor trail màu yellow cố định, hay xoay vòng palette?
+3. Mục 13: tên nhóm 04, ngôn ngữ copy (Anh như ảnh hay Việt), và nguồn ảnh cho trang Community.
