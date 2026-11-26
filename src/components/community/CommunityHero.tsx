@@ -4,13 +4,21 @@ import { useRef, type CSSProperties } from "react";
 import { motion, useScroll, useTransform, type MotionValue } from "motion/react";
 import { communityHero } from "@/content/community";
 
-/** Hero /community 1920 × 1478, nền vàng (MOTION mục 13 · 1). Ảnh dùng khối màu placeholder. */
+/** Hero /community 1920 × 1478, nền ink + lưới như trang chủ (MOTION mục 13 · 1). Ảnh dùng khối màu placeholder. */
 export function CommunityHero() {
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
 
   return (
-    <section ref={ref} aria-labelledby="community-hero-title" className="relative h-[1478px] w-[1920px] overflow-hidden bg-yellow text-ink">
+    <section ref={ref} aria-labelledby="community-hero-title" className="relative h-[1478px] w-[1920px] overflow-hidden bg-ink text-white">
+      {/* Lưới nền như Hero trang chủ */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-black/10"
+      >
+        <div className="absolute inset-0 bg-[url('/assets/backgrounds/grid-background.png')] bg-[length:1920px_900px] bg-repeat-y mix-blend-screen" />
+      </div>
+
       {communityHero.photos.map((p, i) => (
         <Photo key={i} index={i} progress={scrollYProgress} {...p} />
       ))}
@@ -19,7 +27,7 @@ export function CommunityHero() {
         <p className="ch-rise text-[16px] leading-none font-bold tracking-[0.18em] uppercase" style={{ "--d": 0 } as CSSProperties}>
           {communityHero.eyebrow}
         </p>
-        <h1 id="community-hero-title" className="mt-[56px] font-display text-[240px] leading-[220px] font-extrabold uppercase">
+        <h1 id="community-hero-title" className="mt-[56px] font-display text-[240px] leading-[220px] font-extrabold text-yellow uppercase">
           {communityHero.title.map((line, i) => (
             <span key={line} className="block overflow-hidden py-[0.12em] -my-[0.12em]">
               <span className="ch-line block" style={{ "--d": 120 + i * 100 } as CSSProperties}>

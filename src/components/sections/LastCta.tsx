@@ -1,3 +1,4 @@
+import { FlickerText } from "@/components/motion/FlickerText";
 import { PillLink } from "@/components/ui/PillLink";
 import { lastCta } from "@/content/sections";
 
@@ -11,10 +12,14 @@ export function LastCta() {
       <h2 id="last-cta-title" className="sr-only">
         {lastCta.line1} {lastCta.line2}
       </h2>
-      <p aria-hidden className={`${line} top-[122px]`}>{lastCta.line1}</p>
-      <p aria-hidden className={`${line} top-[347px]`}>{lastCta.line2}</p>
+      <p aria-hidden className={`${line} top-[122px]`}>
+        <FlickerText text={lastCta.line1} seed={1} />
+      </p>
+      <p aria-hidden className={`${line} top-[347px]`}>
+        <FlickerText text={lastCta.line2} seed={2} />
+      </p>
       <p className="text-trim absolute top-[589px] left-[992px] w-[792px] -translate-x-1/2 text-center text-[24px] leading-[30px] font-medium text-white uppercase">
-        {lastCta.body}
+        <FlickerText text={lastCta.body} seed={3} spread={1100} />
       </p>
       <PillLink href={lastCta.cta.href} className="absolute top-[754px] left-1/2 w-[164px] -translate-x-1/2">
         {lastCta.cta.label}

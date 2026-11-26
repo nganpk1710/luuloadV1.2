@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 export default function CommunityPage() {
   return (
     <main className="relative mx-auto w-[1920px]">
-      <Header tone="dark" active="/community" />
+      <Header active="/community" />
       <CommunityHero />
 
       <Reveal as="section" amount={0.3} aria-labelledby="community-intro" className="relative h-[698px] w-[1920px] bg-white text-ink">

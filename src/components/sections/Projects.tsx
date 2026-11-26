@@ -11,39 +11,61 @@ import { ease, prefersReducedMotion } from "@/lib/motion";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const THETA = 36; // độ giữa 2 ảnh trên trụ
-const STEP = 0.6; // số viewport cuộn cho mỗi ảnh (nhịp nhanh như reference)
-const RADIUS = 820; // px: 2r·sin(θ/2) ≈ 535 = cao ảnh 475 + khe 60
-const IMG = { w: 760, h: 475 };
+/**
+ * Khung ảnh giữa: 912 × 570 (tỉ lệ ảnh gốc 736 × 460), nằm giữa 2 cột chữ (x 512 → 1424).
+ * Ảnh lân cận đẩy lùi ra sau và nghiêng với mép xa lật về phía người xem, như reference
+ * (Feature_projects.mp4): ảnh trên rộng ở mép trên, ảnh dưới rộng ở mép dưới, cả hai nhỏ hơn ảnh giữa.
+ */
+const IMG = { w: 912, h: 570, left: 512, centerY: 612 };
+const STACK = {
+  y: 668, // khoảng cách tâm giữa 2 ảnh (px, trước phối cảnh)
+  z: 250, // đẩy lùi mỗi bậc
+  tilt: 30, // độ nghiêng mỗi bậc
+  perspective: 1400,
+};
+const STEP = 0.6; // số viewport cuộn cho mỗi ảnh
+
+function place(el: HTMLElement, d: number) {
+  const a = Math.min(Math.abs(d), 2.5);
+  const s = Math.sign(d);
+  el.style.transform = `translate3d(0, ${s * a * STACK.y}px, ${-a * STACK.z}px) rotateX(${s * Math.min(a, 1) * STACK.tilt}deg)`;
+  el.style.zIndex = String(10 - Math.round(a * 2));
+  el.style.visibility = a > 2.2 ? "hidden" : "visible";
+}
 
 /**
- * Projects 1920 × 1144 (Figma 2718:429). Bố cục giữ nguyên; khung giữa là trụ 3D nằm ngang nhìn từ bên trong
- * (lõm vào trong, như reference) xoay theo scroll (MOTION mục 4). Pin 3 × 100vh (không dùng snap của ScrollTrigger vì xung đột với Lenis); cột phải đổi theo ảnh active.
+ * Projects 1920 × 1144 (Figma 2718:429). Bố cục giữ nguyên, nền lưới sáng (Grid.png).
+ * Section dính (sticky) trong khung cao 1144 + 3 × 0.6 viewport; cột phải đổi theo ảnh ở giữa (MOTION mục 4).
  */
 export function Projects() {
   const section = useRef<HTMLElement>(null);
-  const drum = useRef<HTMLDivElement>(null);
+  const cards = useRef<(HTMLDivElement | null)[]>([]);
   const [active, setActive] = useState(0);
   const items = projects.items;
   const last = items.length - 1;
 
   useEffect(() => {
     const el = section.current;
-    const d = drum.current;
-    if (!el || !d || prefersReducedMotion()) return;
+    const els = cards.current.filter(Boolean) as HTMLDivElement[];
+    if (!el) return;
+    const render = (p: number) => els.forEach((c, i) => place(c, i - p));
+    render(0);
+    if (prefersReducedMotion()) return;
+    const state = { p: 0 };
     const ctx = gsap.context(() => {
-      gsap.set(d, { z: RADIUS, rotateX: 0 });
-      gsap.to(d, {
-        rotateX: -last * THETA,
+      gsap.to(state, {
+        p: last,
         ease: "none",
+        onUpdate: () => {
+          render(state.p);
+          setActive(Math.round(state.p));
+        },
         scrollTrigger: {
-          // Section dính bằng CSS sticky trong khung cao 1144 + 3 viewport (không dùng pin của GSAP).
           trigger: el.parentElement ?? el,
           start: "top top",
           end: () => `+=${window.innerHeight * last * STEP}`,
-          scrub: 0.4,
+          scrub: 0.5,
           invalidateOnRefresh: true,
-          onUpdate: (st) => setActive(Math.round(st.progress * last)),
         },
       });
     }, el);
@@ -57,81 +79,45 @@ export function Projects() {
       <section
         ref={section}
         aria-labelledby="projects-title"
-        className="sticky top-0 h-[1144px] w-[1920px] overflow-hidden bg-white text-ink"
+        className="sticky top-0 h-[1144px] w-[1920px] overflow-hidden bg-[#E6E6E6] bg-[url('/assets/backgrounds/grid-light.png')] bg-[length:1920px_1680px] bg-top text-ink"
       >
+        {/* Chồng ảnh 3D */}
+        <div aria-hidden={false} className="absolute inset-0" style={{ perspective: STACK.perspective, perspectiveOrigin: `${IMG.left + IMG.w / 2}px ${IMG.centerY}px` }}>
+          {items.map((it, i) => (
+            <div
+              key={it.name}
+              ref={(n) => {
+                cards.current[i] = n;
+              }}
+              className="absolute overflow-hidden bg-ink will-change-transform"
+              style={{ left: IMG.left, top: IMG.centerY - IMG.h / 2, width: IMG.w, height: IMG.h }}
+            >
+              <Image src={it.image} alt={it.alt} fill sizes="912px" className="object-cover" priority={i < 2} />
+            </div>
+          ))}
+        </div>
+
         <h2
           id="projects-title"
-          className="text-trim absolute top-[200px] left-8 w-[472px] font-display text-[120px] leading-[107.273px] font-extrabold uppercase"
+          className="text-trim absolute top-[200px] left-8 z-20 w-[472px] font-display text-[120px] leading-[107.273px] font-extrabold uppercase"
         >
           {projects.title}
         </h2>
-        <p className="text-trim absolute top-[464px] left-8 w-[440px] text-[24px] leading-[39px] font-medium uppercase">
+        <p className="text-trim absolute top-[464px] left-8 z-20 w-[440px] text-[24px] leading-[39px] font-medium uppercase">
           {projects.subtitle}
         </p>
-        <PillLink
-          variant="dark"
-          href={projects.cta.href}
-          className="absolute top-[761px] left-8 w-[164px]"
-        >
+        <PillLink variant="dark" href={projects.cta.href} className="absolute top-[761px] left-8 z-20 w-[164px]">
           {projects.cta.label}
         </PillLink>
 
-        {/* Trụ 3D */}
-        <div
-          className="absolute top-[215.67px] left-[580px] h-[793.67px] w-[760px] overflow-hidden"
-          style={{ perspective: 1400 }}
-        >
-          <div
-            ref={drum}
-            className="absolute top-1/2 left-0 h-0 w-full"
-            style={{
-              transformStyle: "preserve-3d",
-              transform: `translateZ(${RADIUS}px)`,
-            }}
-          >
-            {items.map((it, i) => (
-              <div
-                key={it.name}
-                className="absolute left-0 overflow-hidden bg-[#EDEDED]"
-                style={{
-                  width: IMG.w,
-                  height: IMG.h,
-                  top: -IMG.h / 2,
-                  transform: `rotateX(${i * THETA}deg) translateZ(-${RADIUS}px)`,
-                }}
-              >
-                <Image
-                  src={it.image}
-                  alt={it.alt}
-                  fill
-                  sizes="760px"
-                  className="object-cover"
-                  priority={i < 2}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Cột phải: đổi theo ảnh active */}
-        <div
-          className="absolute top-[200px] left-[1448px] w-[440px]"
-          aria-live="polite"
-        >
+        {/* Cột phải: đổi theo ảnh ở giữa */}
+        <div className="absolute top-[200px] left-[1448px] z-20 w-[440px]" aria-live="polite">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={item.name}
               initial={{ opacity: 0, y: 12 }}
-              animate={{
-                opacity: 1,
-                y: 0,
-                transition: { duration: 0.3, ease: ease.out },
-              }}
-              exit={{
-                opacity: 0,
-                y: -12,
-                transition: { duration: 0.18, ease: ease.out },
-              }}
+              animate={{ opacity: 1, y: 0, transition: { duration: 0.3, ease: ease.out } }}
+              exit={{ opacity: 0, y: -12, transition: { duration: 0.18, ease: ease.out } }}
             >
               <p className="text-trim absolute top-0 left-0 font-display text-[20px] leading-[107.273px] font-bold uppercase">
                 {item.index}
@@ -141,10 +127,7 @@ export function Projects() {
               </p>
               <motion.p
                 initial={{ opacity: 0 }}
-                animate={{
-                  opacity: 1,
-                  transition: { delay: 0.06, duration: 0.3 },
-                }}
+                animate={{ opacity: 1, transition: { delay: 0.06, duration: 0.3 } }}
                 className="text-trim absolute top-[146px] left-0 w-[440px] text-[20px] leading-[30px] font-normal"
               >
                 {item.body}

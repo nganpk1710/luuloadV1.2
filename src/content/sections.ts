@@ -74,9 +74,9 @@ export const community = {
   cta: { label: "Kết nối ngay", href: "/connect" },
   cards: [
     { index: "(01)", title: "nghệ thuật & chế tác", pattern: "NGHE THUAT & CHE TAC", icon: "/assets/cards/community/eye.svg", border: "border-red", left: 32, top: 560, titleTop: 326, size: "text-[60px] leading-[68.387px]" },
-    { index: "(02)", title: "Đời sống & phong vị", border: "border-yellow", left: 504, top: 564, titleTop: 326, size: "text-[60px] leading-[68.387px]" },
-    { index: "(03)", title: "Dòng chảy & Cõi thiêng", border: "border-blue", left: 976, top: 564, titleTop: 313, size: "text-[64px] leading-[70px]" },
-    { index: "(04)", title: "kiến trúc & cảnh quan", border: "border-amber", left: 1448, top: 564, titleTop: 313, size: "text-[64px] leading-[70px]" },
+    { index: "(02)", title: "Đời sống & phong vị", pattern: "DOI SONG & PHONG VI", icon: "/assets/cards/community/eye.svg", border: "border-yellow", left: 504, top: 564, titleTop: 326, size: "text-[60px] leading-[68.387px]" },
+    { index: "(03)", title: "Dòng chảy & Cõi thiêng", pattern: "DONG CHAY & COI THIENG", icon: "/assets/cards/community/eye.svg", border: "border-blue", left: 976, top: 564, titleTop: 313, size: "text-[64px] leading-[70px]" },
+    { index: "(04)", title: "kiến trúc & cảnh quan", pattern: "KIEN TRUC & CANH QUAN", icon: "/assets/cards/community/eye.svg", border: "border-amber", left: 1448, top: 564, titleTop: 313, size: "text-[64px] leading-[70px]" },
   ],
 } as const;
 

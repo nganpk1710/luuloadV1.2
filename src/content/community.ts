@@ -12,7 +12,7 @@ export const communityHero = {
     { left: 1425, top: 315, w: 395, h: 420, rotate: 6, tone: "bg-blue", speed: -0.08 },
     { left: 15, top: 1075, w: 230, h: 340, rotate: 10, tone: "bg-amber", speed: 0.18 },
     { left: 300, top: 900, w: 285, h: 485, rotate: 4, tone: "bg-sky", speed: -0.14 },
-    { left: 1380, top: 880, w: 300, h: 525, rotate: -4, tone: "bg-ink", speed: 0.1 },
+    { left: 1380, top: 880, w: 300, h: 525, rotate: -4, tone: "bg-yellow", speed: 0.1 },
   ],
 } as const;
 

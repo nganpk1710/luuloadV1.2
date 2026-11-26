@@ -1,10 +1,11 @@
-# Lưu Load V2 — Motion & Micro-interaction Spec (v0.4)
+# Lưu Load V2 — Motion & Micro-interaction Spec (v0.5)
 
 > Đọc kèm `docs/IMPLEMENTATION.md`. File này mô tả **hành vi** từng chuyển động, đủ để AI agent dựng mà không phải đoán.
 > Nguồn: 6 video tham chiếu chủ dự án gửi (26.11.2026), 3 component Framer Marketplace, ảnh trạng thái card (Default / Flip), ảnh tổng thể trang Community.
 > **v0.2 (26.11.2026, sau review của chủ dự án):** CTA chỉ còn 2 biến thể trắng/đen; Projects dùng 4 thumbnail có sẵn, giữ bố cục hiện tại; Community card viền đỏ, làm trước card 01; thêm Page transition (mục 11), Cursor trail ở Hero (mục 12), trang `/community` (mục 13). Hashtag giữ nguyên v0.1.
 > **v0.3 (26.11.2026, đã implement):** Page transition: vàng trái · đen viền trắng giữa · đỏ phải, tấm màu trơn. Cursor trail giữ trắng. Hero → Break dùng khung vòm. Nhóm 04 là "Kiến trúc & Cảnh quan" (slug giữ theo Sitemap). Ảnh Community dùng khối màu. Hashtag: mặt sau pill đổi thành **nền ink chữ vàng** (trắng không thấy trên nền section trắng). Projects bỏ snap (xung đột Lenis).
 > **v0.4 (26.11.2026, review lần 2):** Hero → Break morph và phóng **tại chỗ** (như acronym.lol), icon khác giữ nguyên, không di chuyển vòm. Header cố định 95px: cuộn xuống ẩn, cuộn lên hiện nền trắng (logo/menu ink, CTA ink chữ vàng). Projects: trụ **lõm vào trong** (nhìn từ trong trụ), 0.6 viewport mỗi ảnh. Hashtag: hover roll 2D như nút Slush, không lật 3D. Lưới nền Hero sáng hơn (screen 100%). Mũi tên Hero dùng ảnh gốc từ Figma.
+> **v0.5 (26.11.2026, review lần 3):** Projects dựng lại theo reference: ảnh giữa 912 × 570 phẳng, ảnh lân cận lùi ra sau, nhỏ hơn và nghiêng với mép xa lật về phía người xem; nền lưới sáng (Grid.png). Page transition: trang hiện tại thu thành tấm giữa (viền trắng) cùng kích thước với tấm vàng/đỏ, dải vàng · trang · đỏ · vàng · trang mới · đỏ trượt trái, trang mới hiện trong tấm giữa rồi phóng to. Hero Community nền ink + lưới như trang chủ. Last CTA: flicker text (therechabite). Community: cả 4 card lật, chữ chạy theo tên từng card, tạm dùng chung icon con mắt.
 > Thuật ngữ motion dùng theo glossary của Emil Kowalski (giữ tiếng Anh để tra cứu và prompt cho đúng).
 > Giá trị thời gian/easing là **đề xuất** đo từ video (15–60 fps); chỉnh lại khi review trên trình duyệt thật.
 

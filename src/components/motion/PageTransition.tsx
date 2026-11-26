@@ -7,13 +7,13 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { pageZoom, prefersReducedMotion } from "@/lib/motion";
 
 /**
- * Page transition kiểu slush.app (MOTION mục 11, chốt 26.11):
- * 1. Trang hiện tại thu nhỏ thành tấm giữa màn hình (350ms).
- * 2. Dải tấm trượt sang trái 2 ô (600ms): cuối cùng vàng bên trái, tấm ĐEN viền trắng ở giữa, ĐỎ bên phải.
- *    Các tấm hai bên nghiêng 3D. Trang mới được nạp trong lúc trượt.
- * 3. Tấm đen phóng to phủ kín viewport (350ms), rồi mờ đi để lộ trang mới.
+ * Page transition kiểu slush.app (MOTION mục 11, chốt lần 3 · 26.11):
+ * 1. Trang hiện tại thu nhỏ thành tấm giữa (viền trắng), tấm vàng bên trái và đỏ bên phải bay vào, cùng kích thước.
+ * 2. Cả dải (vàng · trang cũ · đỏ · vàng · trang mới · đỏ) trượt sang trái; tấm lệch tâm nghiêng 3D theo vị trí.
+ *    Trang mới được nạp trong lúc trượt, hiện trong tấm giữa.
+ * 3. Tấm giữa phóng to phủ kín màn hình.
  */
-const CARD = 0.36; // tỉ lệ tấm so với viewport
+const CARD = 0.34; // tỉ lệ tấm so với viewport
 const GAP = 28;
 const TILT = 32;
 
@@ -59,56 +59,96 @@ export function PageTransition({ children }: { children: ReactNode }) {
     const vw = window.innerWidth / zoom;
     const vh = window.innerHeight / zoom;
     const w = vw * CARD;
+    const h = vh * CARD;
     const step = w + GAP;
-    const panels = Array.from(ov.querySelectorAll<HTMLElement>("[data-panel]"));
-    const [yellow, black, red] = panels;
-    gsap.set(panels, { width: w, height: vh * CARD });
+    const [y1, r1, y2, black, r2, frame] = Array.from(ov.querySelectorAll<HTMLElement>("[data-panel]"));
     const lenis = window.__lenis;
     lenis?.stop();
 
-    const originY = window.scrollY / zoom + vh / 2;
-    gsap.set(el, { transformOrigin: `50% ${originY}px` });
+    // Dải: vàng · TRANG CŨ · đỏ · vàng · TRANG MỚI · đỏ. Tấm nào lệch tâm thì nghiêng 3D theo vị trí.
+    const slots: [HTMLElement, number][] = [
+      [y1, -step],
+      [r1, step],
+      [y2, 2 * step],
+      [black, 3 * step],
+      [r2, 4 * step],
+    ];
+    const tilt = (x: number) => -Math.max(-1, Math.min(1, x / step)) * TILT;
+    gsap.set([y1, r1, y2, black, r2, frame], { width: w, height: h, autoAlpha: 1, scale: 1 });
+    gsap.set(el, { transformOrigin: `50% ${window.scrollY / zoom + vh / 2}px`, transformPerspective: 1600 });
     gsap.set(ov, { autoAlpha: 1 });
-    // Vị trí slot so với tâm: tấm cũ ở 0; vàng ở +1, đen ở +2, đỏ ở +3 rồi cả dải lùi 2 slot.
-    gsap.set(yellow, { x: vw / 2 + w, rotateY: -TILT, autoAlpha: 1 });
-    gsap.set(black, { x: step * 2, rotateY: -TILT, scale: 1, autoAlpha: 1 });
-    gsap.set(red, { x: step * 3, rotateY: -TILT, autoAlpha: 1 });
+    // Cắt trang theo đúng khung viewport để tấm giữa có cùng tỉ lệ với các tấm màu.
+    const clipTo = (scrollTop: number) => {
+      const docH = el.scrollHeight;
+      const top = scrollTop / zoom;
+      const bottom = Math.max(0, docH - top - vh);
+      gsap.set(el, { clipPath: `inset(${top}px 0px ${bottom}px 0px round ${24 / CARD}px)` });
+    };
+    clipTo(window.scrollY);
 
-    const shrink = gsap.timeline();
-    shrink
-      .to(el, { scale: CARD, borderRadius: 24 / CARD, duration: 0.35, ease: "power2.inOut" }, 0)
-      .to(yellow, { x: step, duration: 0.35, ease: "power2.out" }, 0);
-    await shrink;
+    const strip = { s: 0, open: 0 };
+    const frameScale = { v: 1 / CARD };
+    let swapped = false;
+    const layout = () => {
+      // open: 0 → 1 đưa 2 tấm bên cạnh từ ngoài màn hình vào chỗ
+      for (const [node, base] of slots) {
+        const x = base - strip.s + (base === -step ? -(1 - strip.open) * vw : base === step ? (1 - strip.open) * vw : 0);
+        gsap.set(node, { x, rotateY: tilt(x) });
+      }
+      const pageX = (swapped ? 3 * step : 0) - strip.s;
+      gsap.set(el, { x: pageX, rotateY: tilt(pageX) });
+      gsap.set(frame, { x: pageX, rotateY: tilt(pageX), scale: frameScale.v });
+    };
+    layout();
 
-    const slide = gsap.timeline({ defaults: { duration: 0.6, ease: "power2.inOut" } });
-    slide
-      .to(el, { x: -step * 2 }, 0)
-      .to(yellow, { x: -step, rotateY: TILT }, 0)
-      .to(black, { x: 0, rotateY: 0 }, 0)
-      .to(red, { x: step, rotateY: -TILT }, 0);
-    await slide;
+    // 1. Trang hiện tại thu nhỏ thành tấm giữa, viền trắng; vàng và đỏ bay vào hai bên.
+    await gsap
+      .timeline({ onUpdate: layout })
+      .to(el, { scale: CARD, duration: 0.4, ease: "power2.inOut" }, 0)
+      .fromTo(frameScale, { v: 1 / CARD }, { v: 1, duration: 0.4, ease: "power2.inOut" }, 0)
+      .fromTo(frame, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.25 }, 0.15)
+      .to(strip, { open: 1, duration: 0.4, ease: "power2.out" }, 0);
 
-    // Nạp trang mới khi tấm đen đã ở giữa (tấm cũ giữ nội dung cũ trong lúc trượt).
+    // 2. Dải trượt sang trái 3 ô. Qua nửa đường thì nạp trang mới vào tấm bên phải.
     const arrivedP = new Promise<void>((res) => (arrived.current = res));
-    navigate(href);
+    let navigated = false;
+    await gsap.to(strip, {
+      s: 3 * step,
+      duration: 1,
+      ease: "power2.inOut",
+      onUpdate: () => {
+        if (!navigated && strip.s > 1.2 * step) {
+          navigated = true;
+          gsap.set(el, { autoAlpha: 0 });
+          navigate(href);
+        }
+        layout();
+      },
+    });
     await Promise.race([arrivedP, new Promise((r) => setTimeout(r, 1500))]);
 
-    // Trang mới đã render bên dưới: đưa về trạng thái gốc, ẩn tới khi tấm đen phủ xong.
-    gsap.set(el, { clearProps: "transform,borderRadius,transformOrigin", autoAlpha: 0 });
+    // Trang mới đã render: đặt vào tấm giữa (thay tấm đen), về đầu trang.
     window.scrollTo(0, 0);
     lenis?.scrollTo(0, { immediate: true });
+    swapped = true;
+    gsap.set(el, { transformOrigin: `50% ${vh / 2}px` });
+    clipTo(0);
+    layout();
+    await gsap.to(el, { autoAlpha: 1, duration: 0.2 });
+    gsap.set(black, { autoAlpha: 0 });
 
-    const cover = Math.max(1 / CARD, 1 / CARD) * 1.08;
-    const grow = gsap.timeline();
-    grow
-      .to(black, { scale: cover, duration: 0.35, ease: "power2.in" }, 0)
-      .to([yellow, red], { autoAlpha: 0, duration: 0.2 }, 0.05);
-    await grow;
+    // 3. Tấm giữa phóng to phủ kín màn hình.
+    await gsap
+      .timeline()
+      .to(el, { scale: 1, duration: 0.45, ease: "power2.inOut" }, 0)
+      .to(frameScale, { v: 1 / CARD, duration: 0.45, ease: "power2.inOut", onUpdate: () => gsap.set(frame, { scale: frameScale.v }) }, 0)
+      .to(frame, { autoAlpha: 0, duration: 0.2 }, 0.25)
+      .to([y2, r2], { x: (i) => (i === 0 ? -vw : vw), autoAlpha: 0, duration: 0.35, ease: "power2.in" }, 0);
 
-    gsap.set(el, { autoAlpha: 1 });
+    gsap.set(el, { clearProps: "transform,clipPath,transformOrigin,opacity,visibility" });
+    gsap.set(ov, { autoAlpha: 0 });
+    gsap.set([y1, r1, y2, black, r2, frame], { clearProps: "all" });
     ScrollTrigger.refresh();
-    await gsap.to(ov, { autoAlpha: 0, duration: 0.3, ease: "power1.out" });
-    gsap.set([yellow, black, red], { clearProps: "all" });
     lenis?.start();
     busy.current = false;
   });
@@ -151,7 +191,14 @@ export function PageTransition({ children }: { children: ReactNode }) {
         className="pointer-events-none invisible fixed inset-0 z-[100] flex items-center justify-center opacity-0"
         style={{ perspective: 1600 }}
       >
-        {["bg-yellow", "bg-ink outline-[3px] outline-white -outline-offset-[3px]", "bg-red"].map((c, i) => (
+        {[
+          "bg-yellow",
+          "bg-red",
+          "bg-yellow",
+          "bg-ink outline-[3px] outline-white -outline-offset-[3px]",
+          "bg-red",
+          "z-10 outline-[3px] outline-white -outline-offset-[3px]", // viền trắng bám theo tấm trang
+        ].map((c, i) => (
           <div
             key={i}
             data-panel

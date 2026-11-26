@@ -42,13 +42,6 @@ export function Community() {
           </>
         );
         const face = `absolute inset-0 rounded-[20px] border-[20px] border-solid bg-ink font-display font-bold text-white ${c.border}`;
-        if (!("pattern" in c)) {
-          return (
-            <article key={c.index} className={`absolute h-[525px] w-[442px] ${face.replace("absolute inset-0 ", "")}`} style={{ left: c.left, top: c.top }}>
-              {front}
-            </article>
-          );
-        }
         return (
           <article
             key={c.index}
